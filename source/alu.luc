@@ -8,13 +8,29 @@ module alu (
     output n
 ) {
     
-    
+    adder adder
+    compare compare
+    boolean bool
     
     always {
         // implement alu logic here
-        out = 0 
-        z = 0
-        v = 0 
-        n = 0    
+    adder.a = a;
+    adder.b = b;
+    adder.alufn_signal = alufn;
+
+    z = adder.z; // nor of output
+    v = adder.v;
+    n = adder.n;
+    compare.z = adder.z;
+    compare.v = adder.v;
+    compare.n = adder.n;
+    compare.alufn = alufn
+        bool.a = a
+        bool.b = b
+        bool.alufn = alufn
+        
+    //out = c{31b0, compare.cmp}; // concatenation, output test for compare  
+    //out = adder.s   // output test for rca
+        out = bool.bool  // output test for boolean
     }
 }

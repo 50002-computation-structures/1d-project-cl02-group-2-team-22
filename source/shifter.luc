@@ -1,13 +1,312 @@
 module shifter (
-    input a[32],
-    input b[5],
-    input alufn[6],
+    input a[32], // input we are shifting by
+    input b[5],  // how many bits we are shifting by
+    input alufn[6],  //determine SHL(00), SHR(01) or SRA(11)
+    // SHL, SHR fills in with 0, SHR fills in with MSB (bit 31)
     output shift[32]
 ) {
+    // creating instances of muxes for left shift
+    mux_2 shl_16[32]
+    mux_2 shl_8[32] 
+    mux_2 shl_4[32]
+    mux_2 shl_2[32]
+    mux_2 shl_1[32]
+    
+    //creating signals to connect output to input for left shift muxes
+    
+    sig w[32]
+    sig x[32]
+    sig y[32]
+    sig z[32]
+    
+    mux_2 shr_16[32]
+    mux_2 shr_8[32] 
+    mux_2 shr_4[32]
+    mux_2 shr_2[32]
+    mux_2 shr_1[32]
+    
+    sig wr[32]
+    sig xr[32]
+    sig yr[32]
+    sig zr[32]
+    
+    
+    mux_2 sra_16[32]
+    mux_2 sra_8[32] 
+    mux_2 sra_4[32]
+    mux_2 sra_2[32]
+    mux_2 sra_1[32]
+    
+    sig wra[32]
+    sig xra[32]
+    sig yra[32]
+    sig zra[32]
 
     always {
-        // implement shifter unit logic here
+        //setting default values to drive
+        // left shifter
         shift = 0
+        shl_16.s0 = 32x{1b0}
+        shl_8.s0 = 32x{1b0}
+        shl_4.s0 = 32x{1b0}
+        shl_2.s0 = 32x{1b0}
+        shl_1.s0 = 32x{1b0}
+        
+        shl_16.in = 32x{{2b00}}  // 2b as you have 2 different pathways to encode
+        shl_8.in = 32x{{2b00}}
+        shl_4.in = 32x{{2b00}}
+        shl_2.in = 32x{{2b00}}
+        shl_1.in = 32x{{2b00}}
+        
+        w = 32x{1b0}
+        x = 32x{1b0}
+        y = 32x{1b0}
+        z = 32x{1b0}
+        
+        //right shifter
+        shr_16.s0 = 32x{1b0}
+        shr_8.s0 = 32x{1b0}
+        shr_4.s0 = 32x{1b0}
+        shr_2.s0 = 32x{1b0}
+        shr_1.s0 = 32x{1b0}
+        
+        shr_16.in = 32x{{2b00}}  // 2b as you have 2 different pathways to encode
+        shr_8.in = 32x{{2b00}}
+        shr_4.in = 32x{{2b00}}
+        shr_2.in = 32x{{2b00}}
+        shr_1.in = 32x{{2b00}}
+        
+        wr = 32x{1b0}
+        xr = 32x{1b0}
+        yr = 32x{1b0}
+        zr = 32x{1b0}
+        
+        
+        //right shift arithmetic 
+        sra_16.s0 = 32x{1b0}
+        sra_8.s0 = 32x{1b0}
+        sra_4.s0 = 32x{1b0}
+        sra_2.s0 = 32x{1b0}
+        sra_1.s0 = 32x{1b0}
+        
+        sra_16.in = 32x{{2b00}}  // 2b as you have 2 different pathways to encode
+        sra_8.in = 32x{{2b00}}
+        sra_4.in = 32x{{2b00}}
+        sra_2.in = 32x{{2b00}}
+        sra_1.in = 32x{{2b00}}
+        
+        wra = 32x{1b0}
+        xra = 32x{1b0}
+        yra = 32x{1b0}
+        zra = 32x{1b0}
+        
+        
+        // setting selector inputs
+        repeat(i, 32, 0, 1){
+            shl_16.s0[i] = b[4]
+            shl_8.s0[i] = b[3]
+            shl_4.s0[i] = b[2]
+            shl_2.s0[i] = b[1]
+            shl_1.s0[i] = b[0]            
+            
+            shr_16.s0[i] = b[4]
+            shr_8.s0[i] = b[3]
+            shr_4.s0[i] = b[2]
+            shr_2.s0[i] = b[1]
+            shr_1.s0[i] = b[0]
+            
+            sra_16.s0[i] = b[4]
+            sra_8.s0[i] = b[3]
+            sra_4.s0[i] = b[2]
+            sra_2.s0[i] = b[1]
+            sra_1.s0[i] = b[0]
+            
+        }
+        
+        //check whether operation is SHL
+        if (alufn[1:0] == 2b00){
+            repeat(i, 32, 0, 1){
+                shl_16.in[i][0] = a[i]  // input at path 0 is just a
+                // input at path 1 is below
+                
+                if (i < 16){   // replace rightmost 16b with 0s
+                    shl_16.in[i][1] = 1b0
+                }else{   // replace leftmost 16b with bits 16b to their right
+                    shl_16.in[i][1] = a[i-16]  
+                }
+            }
+            w = shl_16.out
+            repeat(i, 32, 0, 1){
+                shl_8.in[i][0] = w[i]  // input at path 0 is just w, from shl_16
+                // input at path 1 is below
+                
+                if (i < 8){   // replace rightmost 8b with 0s
+                    shl_8.in[i][1] = 1b0
+                }else{   // replace leftmost 24b with bits 8b to their right
+                    shl_8.in[i][1] = w[i-8]  
+                }
+            }
+            x = shl_8.out
+            
+            repeat(i, 32, 0, 1){
+                shl_4.in[i][0] = x[i]  // input at path 0 is just x, from shl_8
+                //input at path 1 is below
+                if(i < 4){  // replace righmost 4b with 0s
+                    shl_4.in[i][0] = 1b0
+                }else{ // replace leftmost 28b with bits 4b to their right
+                    shl_4.in[i][1] = x[i-4]
+                }
+            }
+            y = shl_4.out
+            
+            repeat(i, 32, 0, 1){
+                shl_2.in[i][0] = y[i]  // input at path 0 is just y, from shl_4
+                //input at path 1 is below
+                if(i < 2){  // replace righmost 2b with 0s
+                    shl_2.in[i][0] = 1b0
+                }else{ // replace leftmost 30b with bits 2b to their right
+                    shl_2.in[i][1] = y[i-2]
+                }
+            }
+            z = shl_2.out
+            
+            repeat(i, 32, 0, 1){
+                shl_1.in[i][0] = z[i]  // input at path 0 is just z, from shl_2
+                //input at path 1 is below
+                if(i == 0){  // replace righmost 1b with 0
+                    shl_1.in[i][0] = 1b0
+                }else{ // replace leftmost 31b with bits 1b to their right
+                    shl_1.in[i][1] = z[i-1]
+                }
+            }
+            shift = shl_1.out
+        }
+        // check whether operation is SHR
+        else if (alufn[1:0] == 2b01 ){
+            repeat(i, 32, 0, 1){
+                shr_16.in[i][0] = a[i]  // input at path 0 is just a
+                // input at path 1 is below
+                
+                if (i >= 16){   // replace leftmost 16b with 0s
+                    shr_16.in[i][1] = 1b0
+                }else{   // replace rightmost 16b with bits 16b to their left
+                    shr_16.in[i][1] = a[i+16]  
+                }            
+            }
+            wr = shr_16.out
+            
+            repeat(i, 32, 0, 1){
+                shr_8.in[i][0] = wr[i]  // input at path 0 is just wr
+                // input at path 1 is below
+                
+                if (i >= 24){   // replace leftmost 8b with 0s
+                    shr_8.in[i][1] = 1b0
+                }else{   // replace rightmost 24b with bits 8b to their left
+                    shr_8.in[i][1] = wr[i+8]  
+                }            
+            }
+            xr = shr_8.out
+            
+            repeat(i, 32, 0, 1){
+                shr_4.in[i][0] = xr[i]  // input at path 0 is just xr
+                // input at path 1 is below
+                
+                if (i >= 28){   // replace leftmost 4b with 0s
+                    shr_4.in[i][1] = 1b0
+                }else{   // replace rightmost 28b with bits 4b to their left
+                    shr_4.in[i][1] = xr[i+4]  
+                }            
+            }
+            yr = shr_4.out
+            
+            repeat(i, 32, 0, 1){
+                shr_2.in[i][0] = yr[i]  // input at path 0 is just yr
+                // input at path 1 is below
+                
+                if (i >= 30){   // replace leftmost 2b with 0s
+                    shr_2.in[i][1] = 1b0
+                }else{   // replace rightmost 30b with bits 2b to their left
+                    shr_2.in[i][1] = yr[i+2]  
+                }            
+            }
+            zr = shr_2.out
+            
+            repeat(i, 32, 0, 1){
+                shr_1.in[i][0] = zr[i]  // input at path 0 is just zr
+                // input at path 1 is below
+                
+                if (i == 31){   // replace leftmost 1b with 0
+                    shr_1.in[i][1] = 1b0
+                }else{   // replace rightmost 31b with bits 1b to their left
+                    shr_1.in[i][1] = zr[i+1]  
+                }            
+            }          
+            shift = shr_1.out  
+            
+         // check whether operation is SRA
+        }else if (alufn[1:0] == 2b11){
+            repeat(i, 32, 0, 1){
+                sra_16.in[i][0] = a[i]  // input at path 0 is just a
+                // input at path 1 is below
+                
+                if (i >= 16){   // replace leftmost 16b with MSB
+                    sra_16.in[i][1] = a[31]
+                }else{   // replace rightmost 16b with bits 16b to their left
+                    sra_16.in[i][1] = a[i+16]  
+                }            
+            }
+            wra = sra_16.out
+            
+            repeat(i, 32, 0, 1){
+                sra_8.in[i][0] = wra[i]  // input at path 0 is just wra
+                // input at path 1 is below
+                
+                if (i >= 24){   // replace leftmost 8b with MSB
+                    sra_8.in[i][1] = a[31]
+                }else{   // replace rightmost 24b with bits 8b to their left
+                    sra_8.in[i][1] = wra[i+8]  
+                }            
+            }
+            xra = sra_8.out
+            
+            repeat(i, 32, 0, 1){
+                sra_4.in[i][0] = xra[i]  // input at path 0 is just xra
+                // input at path 1 is below
+                
+                if (i >= 28){   // replace leftmost 4b with MSB
+                    sra_4.in[i][1] = a[31]
+                }else{   // replace rightmost 28b with bits 4b to their left
+                    sra_4.in[i][1] = xra[i+4]  
+                }            
+            }
+            yra = sra_4.out
+            
+            repeat(i, 32, 0, 1){
+                sra_2.in[i][0] = yra[i]  // input at path 0 is just yra
+                // input at path 1 is below
+                
+                if (i >= 30){   // replace leftmost 2b with MSB
+                    sra_2.in[i][1] = a[31]
+                }else{   // replace rightmost 30b with bits 2b to their left
+                    sra_2.in[i][1] = yra[i+2]  
+                }            
+            }
+            zra = sra_2.out
+            
+            repeat(i, 32, 0, 1){
+                sra_1.in[i][0] = zra[i]  // input at path 0 is just zr
+                // input at path 1 is below
+                
+                if (i == 31){   // replace leftmost 1b with MSB
+                    sra_1.in[i][1] = a[31]
+                }else{   // replace rightmost 31b with bits 1b to their left
+                    sra_1.in[i][1] = zra[i+1]  
+                }            
+            }          
+            shift = sra_1.out
+             
+        }
+        
         
     } 
 }

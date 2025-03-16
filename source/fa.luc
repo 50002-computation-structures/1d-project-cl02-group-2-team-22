@@ -1,17 +1,16 @@
 // A full adder combinational logic unit 
 module fa (
-    input a,
-    input b,
-    input cin,
-    output s,
-    output cout
+    input a, 
+    input b,      
+    input cin,  // carry in bit, all 1 bit so no need define size
+
+    output s,  //result of addition
+    output cout // carry out bit 
 ) {
     
+   // sig sum[SIZE]     // since we cannot connect output port s to output port n, we create an intermediate variable sum
     always {
-        // implement 1-bit full adder logic here
-        s = 0
-        cout = 0 
-        
+        s = a ^ b ^ cin
+        cout = (a & b) | (b & cin) | (a & cin)
     }
-    
 }
