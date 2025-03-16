@@ -1,0 +1,37 @@
+module shifter_2 (
+    input a[32], // input we are shifting by
+    input b[5],  // how many bits we are shifting by
+    input alufn[6],  //determine SHL(00), SHR(01) or SRA(11)
+    // SHL, SHR fills in with 0, SHR fills in with MSB (bit 31)
+    output shift[32]
+) {
+    left_shifter shl
+    right_shifter shr
+    right_shifter_arithmetic sra
+    
+    always {
+        // default values 
+        shift = 0
+        shl.a = 0
+        shl.b = 0
+        shr.a = 0
+        shr.b = 0
+        sra.a = 0
+        sra.b = 0
+        
+        if (alufn[1:0] == 2b00){
+            shl.a = a
+            shl.b = b
+            shift = shl.shift
+        }else if (alufn[1:0] == 2b01){
+            shr.a = a
+            shr.b = b
+            shift = shr.shift
+        }else if (alufn[1:0] == 2b11){
+            sra.a = a
+            sra.b = b
+            shift = sra.shift
+        }
+        
+    }
+}
