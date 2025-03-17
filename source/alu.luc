@@ -7,30 +7,60 @@ module alu (
     output v,
     output n
 ) {
-    
+    mux_4 mux4[32] // array of 32 4-input mux to for alu 
+    mux_2 mux2[32]  // array of 32 2-input mux to hold adder and multiplier together as 1 input in mux4
     adder adder
     compare compare
     boolean bool
+    shifter_2 shift
+    multiplier multiplier
     
     always {
-        // implement alu logic here
-    adder.a = a;
-    adder.b = b;
-    adder.alufn_signal = alufn;
-
-    z = adder.z; // nor of output
-    v = adder.v;
-    n = adder.n;
-    compare.z = adder.z;
-    compare.v = adder.v;
-    compare.n = adder.n;
-    compare.alufn = alufn
+        // setting values to drive modules to get output
+        adder.a = a
+        adder.b = b
+        adder.alufn_signal = alufn
+        
+        compare.z = adder.z
+        compare.v = adder.v
+        compare.n = adder.n
+        compare.alufn = alufn
+        
         bool.a = a
         bool.b = b
         bool.alufn = alufn
         
+        shift.a = a
+        shift.b = b[4:0]   // we only use the least sig 5 bits of b for shifter
+        shift.alufn = alufn
+        
+        multiplier.a = a
+        multiplier.b = b
+        
+        // implement alu logic here
+        repeat(i, 32, 0, 1){  // initialising inputs of muxes
+            mux2.in[i][0] = adder.s[i]   
+            mux2.in[i][1] = multiplier.mul[i]
+            mux2.s0 = alufn[1]    // set all 32 muxes to value of alufn[1]
+            
+            mux4.in[i][0] = mux2.out[i]
+            mux4.in[i][1] = bool.bool[i]
+            mux4.in[i][2] = shift.shift[i]
+            mux4.in[i][3] = compare.cmp
+            mux4.s1[i] = alufn[5]     // set all 32 muxes to value of alufn[5]
+            mux4.s0[i] = alufn[4]     // set all 32 muxes to value of alufn[4]
+            
+        }
+        out = mux4.out
+        z = adder.z
+        v = adder.v
+        n = adder.n
+            
+        }
+        
+        
     //out = c{31b0, compare.cmp}; // concatenation, output test for compare  
     //out = adder.s   // output test for rca
-        out = bool.bool  // output test for boolean
-    }
+        //out = bool.bool  // output test for boolean
+    
 }
