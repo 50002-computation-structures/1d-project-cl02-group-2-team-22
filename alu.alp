@@ -160,12 +160,6 @@
                     "type": "DiskFile",
                     "path": "source/seven_seg.luc"
                 }
-            },
-            {
-                "file": {
-                    "type": "DiskFile",
-                    "path": "source/alu_2.luc"
-                }
             }
         ],
         "constraintFiles": [
