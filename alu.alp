@@ -134,7 +134,7 @@
             {
                 "file": {
                     "type": "DiskFile",
-                    "path": "source/alu_auto_tester.luc"
+                    "path": "source/alu_auto_tester_2.luc"
                 }
             }
         ],

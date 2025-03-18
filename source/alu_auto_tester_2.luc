@@ -1,0 +1,280 @@
+module alu_auto_tester_2 (
+    input clk,  // clock
+    input rst,  // reset
+    input io_button[5],
+    input io_dip[3][8],
+    output io_led[3][8],
+    output io_segment[8],
+    output led[8],
+    output io_select[4]
+) {
+    
+    alu alu
+    
+    //list out states
+    enum States {
+        RUN,
+        STOP,
+        IDLE,
+        NEXT,
+        PREV
+    }
+    
+    const SIZE = 29
+    const SLOW_CLOCK_DEFAULT_SPEED = $is_sim() ? 8 : 28 // put 8  for sim, 28 for hardware
+    const CLK_FREQ = $is_sim() ? 1000 : 10000000
+    
+    sig slow_clock
+    
+    //list of instructions
+  const TESTS = { // 32b a, 32b b, 6b alufn, 32b output, 3b z,v,n concatentated together      
+    //boolean 
+    c{b00000000000000000000000000000000, b00000000000000000000000000000000, b011000, b00000000000000000000000000000000, b100},//and
+    c{b00000000000000000000000000000000, b00000000000000000000000000000000, b011110, b00000000000000000000000000000000, b100},//or
+    c{b11111111111111111111111111111111, b11111111111111111111111111111111, b010110, b00000000000000000000000000000000, b001},//xor
+    
+    //compare
+    //CMPEQ
+    c{b00000000000000000000000000000001, b00000000000000000000000000000001, b110011, b00000000000000000000000000000001, b100},
+    //CMPLT
+    c{b11111111111111111111111111111110, b11111111111111111111111111111111, b110101, b00000000000000000000000000000001, b001},
+    //CMPLE
+    c{b00000000000000000000000000000000, b00000000000000000000000000000000, b110111, b00000000000000000000000000000001, b100},
+        
+     //shifter
+    // shift left by 0
+    c{b00000000000000010000000000000001, b00000000000000000000000000000000, b100000, b00000000000000010000000000000001, b000},
+    // shift right by 31
+    c{b10000000000000000000000000000000, b00000000000000000000000000011111, b100001, b00000000000000000000000000000001, b010},
+    //SRA by 2, MSB is 0
+    c{b01000000000000000000000000000000, b00000000000000000000000000000010, b100011, b00010000000000000000000000000000, b001},
+    //SRA by 1, MSB is 1
+    c{b10000000000000000000000000000000, b00000000000000000000000000000001, b100011, b11000000000000000000000000000000, b001},
+        
+    //multiplier
+    // zero times 0
+    c{b00000000000000000000000000000000, b00000000000000000000000000000000, b000010, b00000000000000000000000000000000, b100},
+    // multiply by 0
+    c{b00000000000000000000000000000101, b00000000000000000000000000000000, b000010, b00000000000000000000000000000000, b000},
+    // mutiply overflow
+    c{b01111111111111111111111111111111, b00000000000000000000000000000010, b000010, b01111111111111111111111111111110, b011},
+
+    // adder
+    c{b00000000000000000000000000000001, b00000000000000000000000000000001, b000000, b00000000000000000000000000000010, b000},
+    c{b01111111111111111111111111111111, b00000000000000000000000000000001, b000000, b10000000000000000000000000000000, b011},
+    c{b11111111111111111111111111111000, b11111111111111111111111111111111, b000000, b11111111111111111111111111110111, b001},
+    c{b01111111111111111111111111111111, b11111111111111111111111111111111, b000001, b10000000000000000000000000000000, b011}
+  };
+    
+
+    
+    //all signals
+    sig current_inputs[105]
+    sig current_output[105]
+    sig current_v
+    
+    sig correct_ans[35]
+    sig correct_out[32]
+    sig correct_z
+    sig correct_v
+    sig correct_n
+    
+    
+    .clk(clk) {
+        
+        edge_detector io_button_edge[5](#RISE(5x{{1}}), #FALL(5x{{0}})) //edge detector component in alchitry lab
+        edge_detector slow_clock_edge(#RISE(1), #FALL(0))
+        button_conditioner io_button_cond[5](#CLK_FREQ(5x{{CLK_FREQ}})) 
+        .rst(rst) {
+            //initialize all dffs
+            dff counter[SIZE]
+            dff states[$width(States)](#INIT(States.IDLE)) //reset everything back to idle
+            dff slow_clock_enable(#INIT(0))
+            dff pc[6](#INIT(0))
+            dff is_correct (#INIT(1))
+        }
+    }
+    
+ always {
+        // implement alu auto tester logic here
+        
+        //drive inputs with default values
+        alu.a = 0
+        alu.b = 0
+        alu.alufn = 0
+        io_led = 3x{{8h0}}
+        io_segment = 0
+        io_select = 4hF
+        led = 0
+        
+        // condition the buttons, then take rising edges only
+        io_button_cond.in = io_button
+        io_button_edge.in = io_button_cond.out
+        
+        // connect dffs 
+        counter.d = counter.q + 1 // always increment
+        states.d = states.q
+        slow_clock_enable.d = slow_clock_enable.q
+        pc.d=pc.q
+        
+        is_correct.d=is_correct.q
+        
+        // signal connection for slow clock
+        slow_clock = counter.q[SLOW_CLOCK_DEFAULT_SPEED] // pointed based on the bit of the counter 
+        
+        //assign input to clock edge detector depending on value of slow_clock_enable
+        case (slow_clock_enable.q){
+            0:
+                slow_clock_edge.in = 0 // always don't increment or decrement
+            1: 
+                slow_clock_edge.in =  slow_clock 
+            default:
+                slow_clock_edge.in = 0
+        }
+        
+        //define state conditions and transitions
+        case (states.q){
+            States.IDLE:
+            
+                // this takes precedence
+                // if slow clock rising edge, go to NEXT state to update current index
+            if (slow_clock_edge.out){
+            states.d=States.NEXT
+                }
+
+                //if button[1] is pressed, either resume or pause operations
+            else if (io_button_edge.out[1]){
+                if (~|slow_clock_enable.q){
+                    states.d=States.RUN 
+                    }
+                
+                else {
+                    states.d=States.STOP
+                }
+            }
+                //if paused and button[4] pressed, go to next
+            else if (io_button_edge.out[4]){
+                if (~|slow_clock_enable.q){
+                        states.d=States.NEXT
+                    }
+                }
+                //if paused and button[3] pressed, go to prev
+            else if (io_button_edge.out[3]){
+                if (~|slow_clock_enable.q){
+                        states.d=States.PREV
+                    }
+                }
+            
+            else if (~is_correct.q){ //stop if encounter wrong output
+                if (slow_clock_enable.q){
+                    states.d=States.STOP
+                }
+               
+            }
+            
+            else if (~io_dip[2][7]){ //pause slow clock if switch to manual tester
+                states.d=States.STOP
+                }
+            
+            States.NEXT:
+                // move on to next test case
+            if (pc.q<d44){
+                    pc.d=pc.q+1
+                }
+            else{
+                pc.d=0 //move to first test case if current index is last index (cyclic)
+                }
+ 
+                
+                
+            states.d=States.IDLE
+
+            States.PREV:
+                //move to previous test case
+            if (pc.q>d0){
+                    pc.d=pc.q-1
+                }
+            else{
+                pc.d=d44 //move to last test case if current index is 0 (cyclic)
+                }
+            states.d=States.IDLE
+            
+            States.RUN:
+                // handle slow clock, next cycle set to 1
+            slow_clock_enable.d=1
+                // return to IDLE
+            states.d=States.IDLE
+            
+            States.STOP:
+                // handle slow clock, next cycle set to 0
+            slow_clock_enable.d=0
+                // return to IDLE
+            states.d=States.IDLE
+           
+            
+        }
+        
+        //READING TEST CASES
+        current_inputs=TESTS[pc.q]
+        alu.alufn = current_inputs[40:35]
+        alu.a = current_inputs[104:73]
+        alu.b = current_inputs[72:41]
+        
+        //simulation of 'wrong' answer
+        if(io_dip[0][0]){
+            current_output = ~alu.out //check if first dip button is being pressed down. if yes, invert the output and v
+            current_v = ~alu.v
+        }
+        else{
+            current_output=alu.out
+            current_v = alu.v
+        }
+        
+        //FETCHING CORRECT OUTPUTS
+        correct_ans = current_inputs[pc.q]
+        correct_out= correct_ans[34:3]
+        correct_z = correct_ans[2]
+        correct_v = correct_ans[1]
+        correct_n = correct_ans[0]
+        
+        
+        //CHECKING IF OUTPUT IS CORRECT
+        if ((correct_out == current_output) | (correct_v & current_v)){ // either result is correct, or overflow
+            
+            if ((current_inputs[40:35] == b000000)| (current_inputs[40:35] == b000001)){ //additional check for add and sub
+                
+                
+                if ((correct_z == alu.z & correct_n == alu.n) //either z and n values correct,
+                    | (correct_v == current_v)){ //or overflow happens and alu correctly detects it
+                    is_correct.d=1
+                    led[1]=1
+                }
+                else{ 
+                    is_correct.d=0
+                    led[2]=1
+                }
+            }
+            else{ //for other operations, no need additional check
+                is_correct.d=1
+                led[1]=1
+            }
+        }
+        else{ //wrong (incorrect value AND not overflow)
+            is_correct.d=0
+            led[2]=1
+        }
+        
+
+        
+        
+        
+        led[0]= slow_clock  //blink at the rising edge of slow clock
+        io_led[1]=c{b00,current_inputs[40:35]} //display current ALUFN
+        io_led[0]=pc.q //display current instruction index
+        
+        
+        
+        
+    }
+}
+        

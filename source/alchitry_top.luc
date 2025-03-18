@@ -22,12 +22,14 @@ module alchitry_top (
     
     
     //alu_manual_tester alu_manual(.clk(clk), .rst(rst), .io_button(io_button), .io_dip(io_dip), #CLK_FREQ(CLK_FREQ)) 
-    //alu_auto_tester alu_auto(.clk(clk), .rst(rst), .io_button(io_button), .io_dip(io_dip))
+    alu_auto_tester_2 alu_auto(.clk(clk), .rst(rst), .io_button(io_button), .io_dip(io_dip))
     alu_manual_tester alu_manual(.clk(clk), .rst(rst), .io_button(io_button), .io_dip(io_dip))
     
 
     
     always {
+        io_segment = 0
+        io_select = 4hF
 
         reset_cond.in = ~rst_n  // input raw inverted reset signal
         rst = reset_cond.out    // conditioned reset
@@ -39,18 +41,18 @@ module alchitry_top (
         
         // to test ALU 
         
-       // if (io_dip[2][7]){
-       //     io_segment = alu_auto.io_segment
-       //     io_select = alu_auto.io_select         
-       //     io_led = alu_auto.io_led
-       //     led = alu_auto.led
-       // }
-       // else{
+       if (io_dip[2][7]){
+            io_segment = alu_auto.io_segment
+            io_select = alu_auto.io_select         
+            io_led = alu_auto.io_led
+            led = alu_auto.led
+        }
+       else{
             io_segment = alu_manual.io_segment
             io_select = alu_manual.io_select         
             io_led = alu_manual.io_led
             led=alu_manual.led
-       // }
+       }
  
     }
 }
