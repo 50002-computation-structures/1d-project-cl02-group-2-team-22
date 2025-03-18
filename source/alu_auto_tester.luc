@@ -1,0 +1,83 @@
+module alu_auto_tester (
+    input clk,              // 100MHz clock
+    input rst,            // reset button (active low)
+    output led[8],          // 8 user controllable LEDs on the rightside (vertical)
+    //input usb_rx,            // USB->Serial input
+    //output usb_tx,           // USB->Serial output
+    output io_led[3][8],     // LEDs on IO Shield
+    output io_segment[8],        // 7-segment LEDs on IO Shield
+    output io_select[4],        // Digit select on IO Shield
+    input io_button[5],      // 5 buttons on IO Shield
+    input io_dip[3][8]       // DIP switches on IO Shield
+) {
+    enum States{
+        START,  // start running the auto tester, which will cycle through test cases
+        UPDATE_AND_CHECK, // input in the next test case and check its output, have to show both output and whether its correct
+                          // will return to idle once all states are done
+        IDLE   // start state, no inputs yet
+    }
+    
+    // USING A ROM TO STORE OUR TEST CASES
+    // will index through it by using a dff to hold our index value
+
+
+  const TESTS = { // 32b a, 32b b, 6b alufn, 32b output, 3b z,v,n concatentated together
+    //boolean 
+    c{b00000000000000000000000000000000, b11111111111111111111111111111111, b011000, b00000000000000000000000000000000, b000} //and
+
+  };
+    
+    const DEPTH = $width[TESTS]
+
+    
+    const CLK_FREQ = $is_sim() ? 1000 : 10000000 // put 1000 only for sim, 10M on hardware
+    const SEVEN_SEG_DIV = $is_sim() ? 3 : 16   // for seven seg display
+    const SLOW_CLOCK_DEFAULT_SPEED = $is_sim() ? 8 : 24 // put 8  for sim, 28 for hardware
+    // defining which bit you want to read for your slow clock
+    
+    
+    const SIZE = $is_sim() ? 8 : 26 // set SIZE to any number you want
+    
+    alu alu  // instantiate alu module
+    
+        // The clock conditioner is used to synchronize the clk signal to the FPGA
+        // clock. This ensures the entire FPGA comes out of clk at the same time.
+    .clk(clk) {
+        // initialise array of 5 button_edge_detectors to detect edge for each of the 5 buttons later
+        // when clock edge rises, output 1, when it falls output 0
+        // by checking for rising edge, if have outputs a 1 (high)
+        // else outputs a 0 (fall)
+        edge_detector io_button_edge[5](#RISE(5x{{1}}), #FALL(5x{{0}}))  
+        
+        // initialise array of 5 button_conditioners to debounce each button later
+        button_conditioner io_button_cond[5](#CLK_FREQ(5x{{CLK_FREQ}})) 
+        
+         // The reset conditioner is used to synchronize the reset signal to the FPGA
+        // clock. This ensures the entire FPGA comes out of reset at the same time.
+        .rst(rst) {
+            multi_seven_seg seg(#DIV(SEVEN_SEG_DIV))  // instantiating seven seg
+            
+            dff states[$width(States)](#INIT(States.IDLE))  // dff to hold states, initialise to start with IDLE
+            dff test_case[$width(States)](#INIT(0))  // dff to hold the index of which test case I am at
+            
+        }
+    }
+    
+    // FREQUENCY DIVIDER
+      .clk(clk){ // to connect the clk input of the dffs to the clk of the FPGA
+            edge_detector slow_clock_edge(#RISE(1), #FALL(0))
+        .rst(rst){
+          dff counter[SIZE] // counter that tracks on the FPGA clock, it is the clock where your speed pointer looks for the bit at
+          dff speed_pointer[$clog2(SIZE)](#INIT(SLOW_CLOCK_DEFAULT_SPEED))
+           // to point (index) to certain bit of the counter dff
+        }  // speed_pointer is to hold the value of slow_clock_default_speed. Reguires log2(slow_clock_default_speed) number of bits
+            // e.g 3 bits to hold the value of 8
+      }
+    bin_to_dec decimal_renderer(#DIGITS(4), #LEADING_ZEROS(1))  // for seven seg
+    
+    
+    always {
+        
+        
+    }
+}

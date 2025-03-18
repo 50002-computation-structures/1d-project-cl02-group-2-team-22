@@ -32,12 +32,6 @@
             {
                 "file": {
                     "type": "DiskFile",
-                    "path": "source/bit_reverse.luc"
-                }
-            },
-            {
-                "file": {
-                    "type": "DiskFile",
                     "path": "source/boolean.luc"
                 }
             },
@@ -91,30 +85,6 @@
             },
             {
                 "file": {
-                    "type": "DiskFile",
-                    "path": "source/left_shifter.luc"
-                }
-            },
-            {
-                "file": {
-                    "type": "DiskFile",
-                    "path": "source/right_shifter.luc"
-                }
-            },
-            {
-                "file": {
-                    "type": "DiskFile",
-                    "path": "source/right_shifter_arithmetic.luc"
-                }
-            },
-            {
-                "file": {
-                    "type": "DiskFile",
-                    "path": "source/shifter_2.luc"
-                }
-            },
-            {
-                "file": {
                     "type": "Component",
                     "path": "Miscellaneous/pipeline.luc"
                 }
@@ -160,19 +130,25 @@
                     "type": "DiskFile",
                     "path": "source/seven_seg.luc"
                 }
+            },
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "source/alu_auto_tester.luc"
+                }
             }
         ],
         "constraintFiles": [
             {
                 "file": {
                     "type": "Component",
-                    "path": "Constraints/io_v1.acf"
+                    "path": "Constraints/alchitry.acf"
                 }
             },
             {
                 "file": {
                     "type": "Component",
-                    "path": "Constraints/alchitry.acf"
+                    "path": "Constraints/io_v1_pulldown.acf"
                 }
             }
         ],

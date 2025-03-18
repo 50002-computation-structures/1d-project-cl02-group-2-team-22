@@ -11,18 +11,16 @@ module adder #(
 ) {
     rca rca
     sig sum[SIZE]
-    sig subtract
     sig b_neg[SIZE]
     
     
     always {
         // implement adder/subtractor unit logic here
-        subtract = alufn_signal[0]
         b_neg = b ^ 32x{alufn_signal[0]} // if alufn = 0, b input stays the same but if alufn is 1, b input flip for every bit
                                          // 1's complement
         rca.a = a
         rca.b = b_neg
-        rca.cin = alufn_signal[0]   // acts as the +1 in 2's complement
+        rca.cin = alufn_signal[0]   // acts as the +1 in 2's complement, depends on whether we are subtracting or not
         sum = rca.s
         s = sum
         n = sum[SIZE - 1]  // bit number 31 (bits start counting from 0)
