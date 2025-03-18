@@ -67,7 +67,7 @@ module left_shifter (
                     shl_4.in[i][0] = x[i]  // input at path 0 is just x, from shl_8
                     //input at path 1 is below
                     if(i < 4){  // replace righmost 4b with 0s
-                        shl_4.in[i][0] = 1b0
+                        shl_4.in[i][1] = 1b0
                     }else{ // replace leftmost 28b with bits 4b to their right
                         shl_4.in[i][1] = x[i-4]
                     }
@@ -78,7 +78,7 @@ module left_shifter (
                     shl_2.in[i][0] = y[i]  // input at path 0 is just y, from shl_4
                     //input at path 1 is below
                     if(i < 2){  // replace righmost 2b with 0s
-                        shl_2.in[i][0] = 1b0
+                        shl_2.in[i][1] = 1b0
                     }else{ // replace leftmost 30b with bits 2b to their right
                         shl_2.in[i][1] = y[i-2]
                     }
@@ -89,7 +89,7 @@ module left_shifter (
                     shl_1.in[i][0] = z[i]  // input at path 0 is just z, from shl_2
                     //input at path 1 is below
                     if(i == 0){  // replace righmost 1b with 0
-                        shl_1.in[i][0] = 1b0
+                        shl_1.in[i][1] = 1b0
                     }else{ // replace leftmost 31b with bits 1b to their right
                         shl_1.in[i][1] = z[i-1]
                     }

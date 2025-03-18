@@ -12,7 +12,7 @@ module alu (
     adder adder
     compare compare
     boolean bool
-    shifter_2 shift
+    shifter shift
     multiplier multiplier
     
     always {
@@ -38,15 +38,23 @@ module alu (
         multiplier.b = b
         
         // implement alu logic here
-        repeat(i, 32, 0, 1){  // initialising inputs of muxes
+        repeat(i, 32, 0, 1){  // initialising inputs of muxes, i is referencing which of the 32 muxes is being instantiated
             mux2.in[i][0] = adder.s[i]   
             mux2.in[i][1] = multiplier.mul[i]
-            mux2.s0 = alufn[1]    // set all 32 muxes to value of alufn[1]
-            
+            mux2.s0[i] = alufn[1]    // set all 32 muxes to value of alufn[1], 
+        }
+        repeat(i, 32, 0, 1){
             mux4.in[i][0] = mux2.out[i]
             mux4.in[i][1] = bool.bool[i]
             mux4.in[i][2] = shift.shift[i]
-            mux4.in[i][3] = compare.cmp
+            
+            if (i == 0){
+                mux4.in[i][3] = compare.cmp
+            }else{
+                mux4.in[i][3] = 1b0
+            }
+            
+            
             mux4.s1[i] = alufn[5]     // set all 32 muxes to value of alufn[5]
             mux4.s0[i] = alufn[4]     // set all 32 muxes to value of alufn[4]
             

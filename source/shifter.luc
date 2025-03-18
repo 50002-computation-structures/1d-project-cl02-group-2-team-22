@@ -43,9 +43,9 @@ module shifter (
     sig zra[32]
 
     always {
+        shift = 0
         //setting default values to drive
         // left shifter
-        shift = 0
         shl_16.s0 = 32x{1b0}
         shl_8.s0 = 32x{1b0}
         shl_4.s0 = 32x{1b0}
@@ -128,9 +128,8 @@ module shifter (
             repeat(i, 32, 0, 1){
                 shl_16.in[i][0] = a[i]  // input at path 0 is just a
                 // input at path 1 is below
-                
                 if (i < 16){   // replace rightmost 16b with 0s
-                    shl_16.in[i][1] = 1b0
+                    shl_16.in[i][1] = 1b0  // 
                 }else{   // replace leftmost 16b with bits 16b to their right
                     shl_16.in[i][1] = a[i-16]  
                 }
@@ -152,7 +151,7 @@ module shifter (
                 shl_4.in[i][0] = x[i]  // input at path 0 is just x, from shl_8
                 //input at path 1 is below
                 if(i < 4){  // replace righmost 4b with 0s
-                    shl_4.in[i][0] = 1b0
+                    shl_4.in[i][1] = 1b0
                 }else{ // replace leftmost 28b with bits 4b to their right
                     shl_4.in[i][1] = x[i-4]
                 }
@@ -163,7 +162,7 @@ module shifter (
                 shl_2.in[i][0] = y[i]  // input at path 0 is just y, from shl_4
                 //input at path 1 is below
                 if(i < 2){  // replace righmost 2b with 0s
-                    shl_2.in[i][0] = 1b0
+                    shl_2.in[i][1] = 1b0
                 }else{ // replace leftmost 30b with bits 2b to their right
                     shl_2.in[i][1] = y[i-2]
                 }
@@ -173,8 +172,8 @@ module shifter (
             repeat(i, 32, 0, 1){
                 shl_1.in[i][0] = z[i]  // input at path 0 is just z, from shl_2
                 //input at path 1 is below
-                if(i == 0){  // replace righmost 1b with 0
-                    shl_1.in[i][0] = 1b0
+                if(i < 1){  // replace righmost 1b with 0  
+                    shl_1.in[i][1] = 1b0
                 }else{ // replace leftmost 31b with bits 1b to their right
                     shl_1.in[i][1] = z[i-1]
                 }
