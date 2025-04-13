@@ -1,0 +1,595 @@
+module game_control_unit (
+    input clk,  // clock
+    input rst,  // reset
+    input regfile_rd2[32], //direct reading of regfile data from rd2, used for BRANCHING STATES
+    
+    input player_1_red_or_start_button,   // player 1 red button input
+    input player_1_green_button,          // player 1 green button input
+    input player_1_blue_button,           // player 1 blue button input  
+    
+    input player_2_red_button,    // player 2 red button input
+    input player_2_green_button,  // player 2 green button input
+    input player_2_blue_button,   // player 2 blue button input
+    input io_button[5],
+    
+    output led[8],
+    output io_led[3][8],
+    output alufn[6],
+    output asel[3],
+    output bsel[3],
+    output wd_sel,
+    output regfile_wa[4],
+    output regfile_ra1[4],
+    output regfile_ra2[4],
+    output regfile_we,
+    output debug[8],
+    
+    input current_colour_choice[2],  // read this input to know what colour to display to players
+    output data,    // output data sent to datapath which is then sent to static mode for ws2812b strip
+    output current_game_state_number[8],  // send to datapath which is then used in alchitry top for tracking current state
+    
+    output p1_current_lives_out[3],  // send to datapth which is then used in alchitry top for tracking p1 lives
+    output p2_current_lives_out[3],  // send to datapth which is then used in alchitry top for tracking p2 lives
+    output is_p1_correct_out, // send to datapath with is then used in alchitry tp for tracking if p1 is correct
+    output is_p2_correct_out, // send to datapath with is then used in alchitry tp for tracking if p2 is correct
+    
+    
+    output debug_current_colour_choice[2],
+    output game_colour_led_value[2],
+    
+    output debug_player_button_input[3]
+) {
+    enum GameStates {
+        IDLE,
+        START,
+        STORE_RNG_COLOUR,
+        SHOW_COLOUR,
+        WAIT_FOR_PLAYER_INPUT,
+        CHECK_P1_ANS,
+        CHECK_P2_ANS,
+        BRANCH_P1_ANS,
+        BRANCH_P2_ANS,
+        RESET_P1_CORRECT,
+        RESET_P2_CORRECT,
+        DEBUG_P1_CORRECT_RESET, // CHECK IF IT REALLY GETS RESET 
+        DEBUG_P2_CORRECT_RESET, // CHECK IF IT REALLY GETS RESET
+        P1_CORRECT_MINUS_P2_LIVES,
+        P2_CORRECT_MINUS_P1_LIVES,
+        UPDATE_P2_LIVES,
+        UPDATE_P1_LIVES,
+        CHECK_P2_ALIVE,
+        CHECK_P1_ALIVE,
+        BRANCH_P2_ALIVE,
+        BRANCH_P1_ALIVE,
+        
+        
+        
+        GAME_OVER,
+        DUMMY_CHECK
+        
+                
+    }
+    const CLK_FREQ = $is_sim() ? 1000 : 10000000 // put 1000 only for sim, 10M on hardware
+    const COLUMN_DIMENSION = 5d30 // how many "columns"? 
+    const ROW_DIMENSION = 5d1 // how many "rows"?
+    const PIXEL_COUNT = 10d30 // how many LEDs in total? 
+        
+    sig colour_choice[2]
+    
+    
+    
+    
+    static_mode colour_display(.clk(clk), .rst(rst),.io_button(io_button), .colour_choice(current_colour_choice),
+        #COLUMN_DIMENSION(COLUMN_DIMENSION), 
+        #ROW_DIMENSION(ROW_DIMENSION),
+        #PIXEL_COUNT(PIXEL_COUNT))
+    
+    
+    dff player_button_input[3](#INIT(0), .clk(clk), .rst(rst))   // for debugging player button inputs
+    dff current_state_number[8](#INIT(0), .clk(clk), .rst(rst))  // for tracking current state on fpga
+    
+    dff is_player_1_correct(#INIT(0), .clk(clk), .rst(rst))   // for testing whether RESET_P1_CORRECT state is working
+    dff is_player_2_correct(#INIT(0), .clk(clk), .rst(rst))   // for testing whether RESET_P2_CORRECT state is working
+    
+    // DFFs for displays
+    dff p1_current_lives[3](.clk(clk), .rst(rst))  // for testing whether P2_CORRECT_MINUS_P1_LIVES state is working
+    dff p2_current_lives[3](.clk(clk), .rst(rst))  // for testing whether P1_CORRECT_MINUS_P2_LIVES state is working
+    
+    dff current_colour[2](#INIT(3),.clk(clk), .rst(rst))   // to hold the current colour value
+    dff game_state[$width(GameStates)](#INIT(GameStates.IDLE), .clk(clk), .rst(rst))  // register to store current state of game
+    
+    
+    .clk(clk){
+        // Use this to check if button has been pressed
+        edge_detector player_1_red_or_start_button_edge (#RISE(1), #FALL(0))  
+        edge_detector player_1_green_button_edge(#RISE(1), #FALL(0))
+        edge_detector player_1_blue_button_edge(#RISE(1), #FALL(0))
+        
+        edge_detector player_2_red_button_edge(#RISE(1), #FALL(0))
+        edge_detector player_2_green_button_edge(#RISE(1), #FALL(0))
+        edge_detector player_2_blue_button_edge(#RISE(1), #FALL(0))
+        
+        
+        edge_detector io_button_edge[5](#RISE(5x{{1}}), #FALL(5x{{0}}))  
+        
+        
+        button_conditioner p1_red_or_start_btn_cond(#CLK_FREQ(CLK_FREQ))
+        button_conditioner p1_green_btn_cond(#CLK_FREQ(CLK_FREQ))
+        button_conditioner p1_blue_btn_cond(#CLK_FREQ(CLK_FREQ))
+        
+        
+        button_conditioner p2_red_btn_cond(#CLK_FREQ(CLK_FREQ)) 
+        button_conditioner p2_green_btn_cond(#CLK_FREQ(CLK_FREQ))
+        button_conditioner p2_blue_btn_cond(#CLK_FREQ(CLK_FREQ))        
+        
+        
+        button_conditioner io_button_cond[5](#CLK_FREQ(5x{{CLK_FREQ}}))
+        
+    }
+    
+    always {
+        // drive outputs
+        p1_current_lives_out = 0
+        p2_current_lives_out = 0
+        is_p1_correct_out = 0
+        is_p2_correct_out = 0
+        debug_player_button_input = 0 // for checking what my player input is
+        current_game_state_number = 0
+        game_colour_led_value = 0
+        data = 0  // data for ws2812b
+        io_led = 3x{{8b0}}
+        led = 8h00              // LED set to off
+        colour_choice = current_colour_choice  // DEBUG THE COLOUR CHOICE
+        debug_current_colour_choice = 0
+        
+        // drive dffs
+        current_state_number.d = current_state_number.q
+        current_colour.d = current_colour.q
+        player_button_input.d = player_button_input.q 
+        is_player_1_correct.d = is_player_1_correct.q
+        is_player_2_correct.d = is_player_2_correct.q
+        p1_current_lives.d = p1_current_lives.q
+        p2_current_lives.d = p2_current_lives.q
+        
+        // standard setting unless overriden by each case
+        alufn = 0
+        asel = 0
+        bsel = 0
+        wd_sel = 0
+        regfile_wa = 0
+        regfile_ra1 = 0
+        regfile_ra2 = 0
+        regfile_we = 0
+        debug = 0
+        
+        // condition the buttons so that they take rising edges only (debouncing the button)
+        p1_red_or_start_btn_cond.in = player_1_red_or_start_button // player 1 red button conditioning
+        player_1_red_or_start_button_edge.in = p1_red_or_start_btn_cond.out
+        
+        p1_green_btn_cond.in = player_1_green_button // player 1 green button conditioning 
+        player_1_green_button_edge.in = p1_green_btn_cond.out  
+        
+        p1_blue_btn_cond.in = player_1_blue_button   // player 1 blue button conditioning
+        player_1_blue_button_edge.in = p1_blue_btn_cond.out
+        
+        p2_red_btn_cond.in = player_2_red_button   // player 2 red button conditioning 
+        player_2_red_button_edge.in = p2_red_btn_cond.out
+        
+        p2_green_btn_cond.in = player_2_green_button // player 2 green button conditioning 
+        player_2_green_button_edge.in = p2_green_btn_cond.out  
+        
+        p2_blue_btn_cond.in = player_2_blue_button   // player 2 blue button conditioning
+        player_2_blue_button_edge.in = p2_blue_btn_cond.out
+        
+        
+        io_button_cond.in = io_button           // io_button conditioning
+        io_button_edge.in = io_button_cond.out
+        
+        
+        
+        game_state.d = game_state.q
+        if (rst){
+            game_state.d = GameStates.IDLE
+        }
+        else{
+            case(game_state.q){
+                
+                GameStates.IDLE:
+                    //led[0] = 1
+                    regfile_ra2 = 4h1   // read from register 1, which has p2 lives
+                    p2_current_lives.d = regfile_rd2[2:0]  // should be set to whatever regfile register 1 is intialised to 
+                    current_state_number.d = 0
+                    regfile_we = 0
+                    //io_led[0][1] = player_1_red_or_start_button_edge.out
+                    //io_led[1][1] = io_button_edge.out[4]
+                    if (io_button_edge.out[4]){
+                        game_state.d = GameStates.START
+                    } 
+                
+                GameStates.START:
+                    //led[1] = 1
+                    regfile_ra2 = 4h0 // read from register 0, which has p1 lives
+                    p1_current_lives.d = regfile_rd2[1:0] // should be set to whatever regfile register 0 is intialised to 
+                    current_state_number.d = 1
+                    regfile_we = 0
+                    game_state.d = GameStates.STORE_RNG_COLOUR
+
+                GameStates.STORE_RNG_COLOUR:
+                    //led[2] = 1
+                    current_state_number.d = 2
+                    //regfile_we = 1
+                    regfile_wa = b0010  // write into register current_colour
+                    alufn = 0  // doesnt matter as we are using wdsel = 1
+                    asel = 0   // doesnt matter
+                    bsel = 0   // doesnt matter
+                    wd_sel = b1
+                    regfile_ra1 = 0  // doesnt matter
+                    
+                    
+                    if (io_button_edge.out[4] ){
+                        regfile_we = 1
+                        game_state.d = GameStates.SHOW_COLOUR
+                    }
+                GameStates.DUMMY_CHECK:
+                    //led[3] = 1
+                    current_state_number.d = 3
+                    regfile_we = 0
+                    regfile_wa = 0
+                    regfile_ra2 = b0010
+                    current_colour.d = regfile_rd2[1:0]  // test if it works
+                                
+                
+                
+                
+                GameStates.SHOW_COLOUR:
+                    led[3] = 1
+                    current_state_number.d = 3
+                    regfile_ra2 = b0010  // doesnt matter
+                    
+                    debug = regfile_rd2[7:0]  // attach to led to see whats the content
+                    
+                    //colour_choice = regfile_rd2[1:0]
+                
+                    //current_colour.d = regfile_rd2[1:0]
+                    //led = 3
+                    //io_led[2][7:6] = current_colour.q
+                    if (io_button_edge.out[4] ){  
+                        regfile_ra2 = b0010  // reading from register current_colour to display colour
+                        //game_colour_led_value = regfile_rd2[1:0]
+                        
+                     
+                        current_colour.d = current_colour_choice
+                    
+                        game_state.d = GameStates.WAIT_FOR_PLAYER_INPUT
+                    }                
+         
+
+                
+                GameStates.WAIT_FOR_PLAYER_INPUT:
+                    //led[4] = 1
+                    current_state_number.d = 4
+                    regfile_ra2 = b0010  // doesnt matter
+                    
+                    debug = regfile_rd2[7:0]
+                    if (player_1_red_or_start_button_edge.out){
+                        regfile_we = 1    // we are writing
+                        regfile_wa = 4h3  // write to p1_colour dff, which is register 3
+                        regfile_ra1 = 0   // doesnt matter as we are not using    
+                        regfile_ra2 = 0   // doesnt matter as we are not using                     
+                        asel = b01      // tagged to value 0, which represents red 
+                        bsel = b00      // doesnt matter as we are not using                        
+                        alufn = 6h1A  // Let "A" pass through
+                        wd_sel = b0   // writing alu output into regfile  
+                        player_button_input.d = b001
+                        game_state.d = GameStates.CHECK_P1_ANS  // go to next state to check if p1 correct
+                    }
+                    else if (player_1_green_button_edge.out){
+                        regfile_we = 1    // we are writing
+                        regfile_wa = 4h3  // write to p1_colour dff, which is register 3
+                        regfile_ra1 = 0   // doesnt matter as we are not using    
+                        regfile_ra2 = 0   // doesnt matter as we are not using                     
+                        asel = b10      // tagged to value 1, which represents green 
+                        bsel = b00      // doesnt matter as we are not using                       
+                        alufn = 6h1A  // Let "A" pass through
+                        wd_sel = b0   // writing alu output into regfile  
+                        player_button_input.d = b010  
+                        game_state.d = GameStates.CHECK_P1_ANS  // go to next state to check if p1 correct                     
+                    }
+                    else if (player_1_blue_button_edge.out){
+                        regfile_we = 1    // we are writing
+                        regfile_wa = 4h3  // write to p1_colour dff, which is register 3
+                        regfile_ra1 = 0   // doesnt matter as we are not using    
+                        regfile_ra2 = 0   // doesnt matter as we are not using                     
+                        asel = b11      // tagged to value 2, which represents blue
+                        bsel = b00      // doesnt matter as we are not using                       
+                        alufn = 6h1A  // Let "A" pass through
+                        wd_sel = b0   // writing alu output into regfile   
+                        player_button_input.d = b011   
+                        game_state.d = GameStates.CHECK_P1_ANS  // go to next state to check if p1 correct                   
+                    }   
+                    else if (player_2_red_button_edge.out){
+                        regfile_we = 1    // we are writing
+                        regfile_wa = 4h4  // write to p2_colour dff, which is register 4
+                        regfile_ra1 = 0   // doesnt matter as we are not using    
+                        regfile_ra2 = 0   // doesnt matter as we are not using                     
+                        asel = b01      // tagged to value 0, which represents red
+                        bsel = b00      // doesnt matter as we are not using                       
+                        alufn = 6h1A  // Let "A" pass through
+                        wd_sel = b0   // writing alu output into regfile    
+                        player_button_input.d = b100
+                        game_state.d = GameStates.CHECK_P2_ANS  // go to next state to check if p2 is correct
+                    }
+                    else if (player_2_green_button_edge.out){
+                        regfile_we = 1    // we are writing
+                        regfile_wa = 4h4  // write to p2_colour dff, which is register 4
+                        regfile_ra1 = 0   // doesnt matter as we are not using    
+                        regfile_ra2 = 0   // doesnt matter as we are not using                     
+                        asel = b10      // tagged to value 1, which represents green
+                        bsel = b00      // doesnt matter as we are not using                       
+                        alufn = 6h1A  // Let "A" pass through
+                        wd_sel = b0   // writing alu output into regfile
+                        player_button_input.d = b101
+                        game_state.d = GameStates.CHECK_P2_ANS  // go to next state to check if p2 is correct                 
+                    }    
+                    else if (player_2_blue_button_edge.out){
+                        regfile_we = 1    // we are writing
+                        regfile_wa = 4h4  // write to p2_colour dff, which is register 4
+                        regfile_ra1 = 0   // doesnt matter as we are not using    
+                        regfile_ra2 = 0   // doesnt matter as we are not using                     
+                        asel = b11      // tagged to value 2, which represents blue
+                        bsel = b00      // doesnt matter as we are not using                       
+                        alufn = 6h1A  // Let "A" pass through
+                        wd_sel = b0   // writing alu output into regfile    
+                        player_button_input.d = b110
+                        game_state.d = GameStates.CHECK_P2_ANS  // go to next state to check if p2 is correct                
+                    }
+                GameStates.CHECK_P1_ANS:
+                        current_state_number.d = 5  // to keep track of which state we are in
+                        regfile_we = 1    // we are writing
+                        regfile_wa = 4h5  // write to p1_correct dff, which is register 5
+                        regfile_ra1 = 4h3   // get p1's ans from p1_colour dff, which is register 3  
+                        regfile_ra2 = 4h2   // get the correct ans from current_colour dff, which is register 2                     
+                        asel = b00      // using rd1
+                        bsel = b00      // using rd2                       
+                        alufn = 6h33  // CMPEQ operation
+                        wd_sel = b0   // writing alu output into regfile
+                        game_state.d = GameStates.BRANCH_P1_ANS  // go to branching state for p1
+                
+                GameStates.CHECK_P2_ANS:
+                        current_state_number.d = 5  // to keep track of which state we are in
+                        regfile_we = 1    // we are writing
+                        regfile_wa = 4h6  // write to p2_correct dff, which is register 6
+                        regfile_ra1 = 4h4   // get p2's ans from p2_colour dff, which is register 4  
+                        regfile_ra2 = 4h2   // get the correct ans from current_colour dff, which is register 2                     
+                        asel = b00      // using rd1
+                        bsel = b00      // using rd2                       
+                        alufn = 6h33  // CMPEQ operation
+                        wd_sel = b0   // writing alu output into regfile
+                        game_state.d = GameStates.BRANCH_P2_ANS  // go to branching state for p1
+                
+                GameStates.BRANCH_P1_ANS:
+                        current_state_number.d = 6  // to keep track of which state we are in
+                        regfile_we = 0    // we are NOT writing
+                        regfile_ra2 = 4h5   // get data from p1_correct dff, which is register 5 
+                        is_player_1_correct.d = regfile_rd2[0]  // for displaying on alchitry top, debugging
+                    
+                        if (regfile_rd2[0]){   // add button press for testing
+                            //game_state.d = Game
+                            //current_state_number.d = 7
+                            if (io_button_edge.out[4]){
+                                game_state.d = GameStates.RESET_P1_CORRECT
+                            }
+                        }
+                        else{
+                            game_state.d = GameStates.STORE_RNG_COLOUR     
+                    }
+                
+                GameStates.BRANCH_P2_ANS:
+                        current_state_number.d = 6  // to keep track of which state we are in
+                        regfile_we = 0 // we are NOT writing
+                        regfile_ra2 = 4h6 // get data from p2_correct dff, which is register 6
+                        is_player_2_correct.d = regfile_rd2[0]  // for displaying on alchitry top, debugging
+                        if (regfile_rd2[0]){  // if player 2 is correct
+                            if (io_button_edge.out[4]){
+                                game_state.d = GameStates.RESET_P2_CORRECT
+                            }
+                        }
+                        else{
+                            game_state.d = GameStates.STORE_RNG_COLOUR
+                        }
+                
+                GameStates.RESET_P1_CORRECT:  // reset content of register p1 to 0 for next round
+                        current_state_number.d = 7 
+                        //regfile_we = 1    // we are writing
+                        regfile_wa = 4h5  // write to p1_correct dff, which is register 5
+                        regfile_ra1 = 0   // doesnt matter as we are not using
+                        regfile_ra2 = 0   // doesnt matter as we are not using                   
+                        asel = b01      // using value 0, which is tied to selector b01
+                        bsel = b00      // doesnt matter as we are not using                      
+                        alufn = 6h1A  // "A" operation, let "A" pass through
+                        wd_sel = b0   // writing alu output into regfile
+                        if (io_button_edge.out[4]){
+                            regfile_we = 1
+                            game_state.d = GameStates.DEBUG_P1_CORRECT_RESET // since p1 is correct, p2 minus 1 life
+                        }
+                GameStates.RESET_P2_CORRECT:  // reset content of register p2 to 0 for next round
+                        current_state_number.d = 7
+                        regfile_wa = 4h6 // write to p2_correct dff, which is register 6
+                        regfile_ra1 = 0 // doesnt matter as we are not using
+                        regfile_ra2 = 0 // doesnt matter as we are not using
+                        asel = b01   // using value 0, which is tied to selector b01
+                        bsel = b00   // doesnt matter as we are not using
+                        alufn = 6h1A  // "A" operation, let "A" pass through
+                        wd_sel = b0  // writing alu output into regfile
+                        if (io_button_edge.out[4]){
+                            regfile_we = 1
+                            game_state.d = GameStates.DEBUG_P2_CORRECT_RESET // since p1 is correct, p2 minus 1 life
+                        }
+                
+                GameStates.DEBUG_P1_CORRECT_RESET:
+                        current_state_number.d = 8
+                        regfile_we = 0  // we are NOT writing
+                        regfile_ra2 = 4h5  // check if p1_correct register is set to 0, which is register 5
+                        is_player_1_correct.d = regfile_rd2[0]
+                        if (io_button_edge.out[4]){
+                            game_state.d = GameStates.P1_CORRECT_MINUS_P2_LIVES
+                        }
+                
+                
+                GameStates.DEBUG_P2_CORRECT_RESET:
+                        current_state_number.d = 8
+                        regfile_we = 0
+                        regfile_ra2 = 4h6  // check if p2_correct register is set to 0, which is register 6
+                        is_player_2_correct.d = regfile_rd2[0]
+                        if (io_button_edge.out[4]){
+                            game_state.d = GameStates.P2_CORRECT_MINUS_P1_LIVES
+                        }
+                
+                GameStates.P1_CORRECT_MINUS_P2_LIVES:
+                        current_state_number.d = 9  
+                        //regfile_we = 1    // we are writing
+                        regfile_wa = 4h1  // write to p2_lives dff, which is register 1
+                        regfile_ra1 = 4h1   // get p2's lives from p2_lives dff, which is register 1  
+                        regfile_ra2 = 0   // doesnt matter as we are not using                  
+                        asel = b00      // using rd1
+                        bsel = b01      // using 1, which is tagged to selector input b01                       
+                        alufn = 6h01  // SUBTRACT operation
+                        wd_sel = b0   // writing alu output into regfile
+                        if (io_button_edge.out[4]){
+                            regfile_we = 1
+                            game_state.d = GameStates.UPDATE_P2_LIVES   // since p2 lost a life, go check if he is alive
+                    }
+                
+                GameStates.P2_CORRECT_MINUS_P1_LIVES:
+                        current_state_number.d = 9
+                        regfile_wa = 4h0  // write to p1_lives dff, which is register 0
+                        regfile_ra1 = 4h0 // get p1's lives from p1_lives dff, which is register 0
+                        regfile_ra2 = 0 // doesnt matter as we are not using
+                        asel = b00  // using rd1
+                        bsel = b01 // using 1, which is tagged to selector input b01
+                        alufn = 6h01  // SUBTRACT operation
+                        wd_sel = b0  // writing alu output into regfile
+                        if (io_button_edge.out[4]){
+                            regfile_we = 1
+                            game_state.d = GameStates.UPDATE_P1_LIVES   // since p1 lost a life, go check if he is alive
+                    }
+                
+                
+                GameStates.UPDATE_P2_LIVES:
+                        current_state_number.d = 10
+                        regfile_we = 0 // we are NOT writing
+                        regfile_ra2 = 4h1  // reading p2_lives dff, which is register 1, to update p2_current_lives
+                        p2_current_lives.d = regfile_rd2[2:0]
+                        if (io_button_edge.out[4]){
+                            game_state.d = GameStates.CHECK_P2_ALIVE
+                        }
+                GameStates.UPDATE_P1_LIVES:
+                        current_state_number.d = 10
+                        regfile_we = 0 // we are NOT writing
+                        regfile_ra2 = 4h0  // reading p1_lives dff, which is register 0, to update p1_current_lives
+                        p1_current_lives.d = regfile_rd2[2:0]
+                        if (io_button_edge.out[4]){
+                            game_state.d = GameStates.CHECK_P1_ALIVE
+                        }
+                
+                
+                GameStates.CHECK_P2_ALIVE: // since p2 lost a life, go check if he is alive
+                        current_state_number.d = 11
+                        regfile_wa = 4h8  // write to p2_alive register, which is register 8
+                        regfile_ra1 = 4h1 // read p2's lives from p2_lives register, which is register 1
+                        regfile_ra2 = 0   // doesnt matter as we are not using another register's data
+                        asel = b00   // using rd1
+                        bsel = b01   // using 1, which is tagged to selector input b01
+                        alufn = 6h35 // CMPLT operation, check if lives < 1
+                        wd_sel = b0  // writing alu output into regfile
+                        if (io_button_edge.out[4]){
+                            regfile_we = 1
+                            game_state.d = GameStates.BRANCH_P2_ALIVE   // branch according to his lives
+                    }      
+                GameStates.CHECK_P1_ALIVE: // since p1 lost a life, go check if he is alive
+                        current_state_number.d = 11
+                        regfile_wa = 4h7 // write to p1_alive register, which is register 7
+                        regfile_ra1 = 4h0 // read p1's lives from p1_lives register, which is register 0
+                        regfile_ra2 = 0 // doesnt matter as we are not using another register's data
+                        asel = b00  // using rd1
+                        bsel = b01  // using 1, which is tagged to selector input b01
+                        alufn = 6h35 // CMPLT operation, check if lives < 1
+                        wd_sel = b0  // writing alu output into regfile
+                        if (io_button_edge.out[4]){
+                            regfile_we = 1
+                            game_state.d = GameStates.BRANCH_P1_ALIVE   // branch according to his lives
+                    }      
+                
+                GameStates.BRANCH_P2_ALIVE:
+                        current_state_number.d = 12
+                        regfile_we = 0  // we are NOT writing
+                        regfile_ra2 = 4h8  // get data from p2_alive dff, which is register 8, to read
+                        if (regfile_rd2[0]){
+                            if (io_button_edge.out[4]){ 
+                            game_state.d = GameStates.GAME_OVER
+                            }
+                        }
+                        else{
+                            game_state.d = GameStates.STORE_RNG_COLOUR
+                    }
+                
+                GameStates.BRANCH_P1_ALIVE:
+                        current_state_number.d = 12
+                        regfile_we = 0  // we are NOT writing
+                        regfile_ra2 = 4h7  // get data from p1_alive dff, which is register 7, to read
+                        if (regfile_rd2[0]){
+                            if (io_button_edge.out[4]){ 
+                            game_state.d = GameStates.GAME_OVER
+                            }
+                        }
+                        else{
+                            game_state.d = GameStates.STORE_RNG_COLOUR
+                    }                
+                
+                
+                
+                
+                GameStates.GAME_OVER:
+                        current_state_number.d = 13
+                        current_colour.d = 3 // ws2812b strip is off to indicate game over
+                        
+
+                                              
+                
+                
+                
+            }
+            io_led[0][0] = player_1_red_or_start_button
+            io_led[0][1] = player_1_green_button
+            io_led[0][2] = player_1_blue_button
+            
+            io_led[1][0] = player_2_red_button
+            io_led[1][1] = player_2_green_button
+            io_led[1][2] = player_2_blue_button
+            
+            
+            // FOR DISPLAY
+            data = colour_display.data   // data for ws2812b strip to display
+            p1_current_lives_out = p1_current_lives.q
+            p2_current_lives_out  = p2_current_lives.q   
+            
+            
+            is_p2_correct_out = is_player_2_correct.q
+            is_p1_correct_out = is_player_1_correct.q
+            
+            current_game_state_number = current_state_number.q  // to keep track of current state
+            debug_player_button_input = player_button_input.q  // to keep track of player button input
+            //io_led[2][7:6] = current_colour.q
+            //led = current_colour_choice
+            debug_current_colour_choice = colour_choice
+            
+            
+            //current_colour.d = b10  // hardsetting to test if LEDs work
+            game_colour_led_value = current_colour.q // to display the current game colour, R G or B
+                                                     // not using ws2812b here, using individual LEDs
+            
+            
+        }
+        
+    }
+}

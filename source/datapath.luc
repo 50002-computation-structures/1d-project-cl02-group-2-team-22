@@ -1,0 +1,150 @@
+module datapath (
+    input clk,  // clock
+    input rst,  // reset
+    input player_1_red_or_start_button,   // player 1 red button input
+    input player_1_green_button,          // player 1 green button input
+    input player_1_blue_button,           // player 1 blue button input  
+    
+    input player_2_red_button,    // player 2 red button input
+    input player_2_green_button,  // player 2 green button input
+    input player_2_blue_button,   // player 2 blue button input
+    
+    input io_button[5],
+    output debuggerino[2],
+    output intermediate_debug[2],
+    output ws2812b_data,   // data for static mode
+    output current_state[8],  // to keep track of current game state
+    output player_button_input[3],  // to keep track of button input
+    
+    output is_player_2_correct,
+    output current_p1_lives[3],
+    
+    output is_player_1_correct,
+    output current_p2_lives[3]
+     
+    
+) {
+ 
+    sig input_alu_a[32]
+    sig input_alu_b[32]
+    sig intermediate_debuggerino[2]   // signal to connect input to output
+        
+    
+    // Different modules needed to create game datapath
+    
+        variable_timer rngesus(.clk(clk), .rst(rst))
+
+        game_control_unit gameStates(
+            .player_1_red_or_start_button(player_1_red_or_start_button), 
+            .player_1_green_button(player_1_green_button),
+            .player_1_blue_button(player_1_blue_button),
+            
+            .player_2_red_button(player_2_red_button),
+            .player_2_green_button(player_2_green_button),
+            .player_2_blue_button(player_2_blue_button),
+            
+            .io_button(io_button),
+            .rst(rst),
+            .clk(clk)
+        )
+  
+        regfile regfile(
+            .we(gameStates.regfile_we), 
+            .wa(gameStates.regfile_wa), 
+            .ra1(gameStates.regfile_ra1), 
+            .ra2(gameStates.regfile_ra2),
+            .rst(rst),
+            .clk(clk)
+        )
+    
+    
+        alu_unit game_alu
+    
+    always {
+        // driving outputs
+        current_state = 0
+        
+        // bootstrapping regfile rd2 directly to game control unit
+        gameStates.regfile_rd2 = regfile.rd2
+        //regfile.write_data = 0
+        debuggerino = 0
+        
+        // asel mux
+        case(gameStates.asel){
+            b00:
+                input_alu_a = regfile.rd1   // Reg[Ra]
+            b01:
+                input_alu_a = d0  // red 
+            b10:
+                input_alu_a = d1  // green
+            b11:
+                input_alu_a = d2  // blue
+            default:
+                input_alu_a = regfile.rd1   
+        }
+        
+        
+        // bsel mux
+        case(gameStates.bsel){ 
+            b00:
+                input_alu_b = regfile.rd2   // Reg[Rb]
+            b01:
+                input_alu_b = d1  // to be used in lives subtraction
+            b10:
+                input_alu_b = d3  // for resetting other values like current colour 
+            b11:
+                input_alu_b = d5  // for resetting lives
+            default:
+                input_alu_b = regfile.rd2
+            
+        }
+        
+        // alu connections 
+        game_alu.a = input_alu_a // from asel mux
+        game_alu.b = input_alu_b // from bsel mux
+        game_alu.alufn = gameStates.alufn // from gameStates output
+        
+        
+        //gameStates.regfile_rd2 = input_alu_b
+        
+        
+        // wdsel mux
+        case(gameStates.wd_sel){ // selects what data is being written into regfile
+            b0:  // data is alu output
+                regfile.write_data = game_alu.out
+                
+             
+            b1:  // data is rng output (only for STORE_COLOUR state)
+                if(rngesus.debug[1:0] == d3){  // since we only have 3 colours but have 2^2 possible states, need to set 1 state
+                    regfile.write_data = 2     //  to output the same as one of the 3 to avoid error
+                    
+                }
+                else{
+                    regfile.write_data = rngesus.debug[1:0]
+                    
+                }
+            default:
+                regfile.write_data = game_alu.out
+                
+        }
+        
+        debuggerino = regfile.current_colour_out[1:0]
+        //intermediate_debuggerino = regfile.current_colour_out[1:0]
+        intermediate_debuggerino = gameStates.debug_current_colour_choice   // from game_control_unit
+        intermediate_debug = intermediate_debuggerino      
+        gameStates.current_colour_choice = regfile.current_colour_out[1:0]
+        ws2812b_data = gameStates.data
+        
+        current_state = gameStates.current_game_state_number
+        player_button_input = gameStates.debug_player_button_input
+        
+
+        current_p2_lives = gameStates.p2_current_lives_out
+        is_player_1_correct = gameStates.is_p1_correct_out
+        
+        current_p1_lives = gameStates.p1_current_lives_out
+        is_player_2_correct = gameStates.is_p2_correct_out
+        
+        
+    }
+}

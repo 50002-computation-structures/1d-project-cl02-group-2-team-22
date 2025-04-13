@@ -1,0 +1,166 @@
+module regfile (
+    input clk,  // clock
+    input rst,  // reset
+    input wa[4], // address of register we are writing to, 4 bits as we have 9 dffs
+    input we, // 1 bit write enable
+    input write_data[32],// data we are writing into register
+    
+    input ra1[4], // read address port 1
+    input ra2[4], // read address port 2
+    
+    output rd1[32], // read data port 1
+    output rd2[32], // read data port 2
+
+    output p1_lives_out[32],  // data needed for display
+    output p2_lives_out[32],  // data needed for display
+    output current_colour_out[32] // data needed for display
+
+) {
+    .clk(clk){
+        .rst(rst){
+            
+            dff p1_lives[32](#INIT(5))  // keeps track of how many lives player 1 has, register 0
+            dff p2_lives[32](#INIT(5))  // keeps track of how many lives player 2 has, register 1
+            
+            dff current_colour[32](#INIT(d3)) // keeps track of colour being displayed, register 2
+            
+            dff p1_colour[32](#INIT(3))   // keeps track of colour p1 pressed, register 3 
+            dff p2_colour[32](#INIT(3))   // keeps track of colour p2 pressed, register 4
+            
+            dff p1_correct[32](#INIT(0))  // store result of checking whether p1 is correct, register 5
+            dff p2_correct[32](#INIT(0))  // store result of checking whether p2 is correct, register 6
+            
+            dff p1_alive[32](#INIT(0))  // store result of checking whether p1 is alive, register 7
+            dff p2_alive[32](#INIT(0))  // store result of checking whether p2 is alive, register 8
+            
+               
+        }
+    }
+    
+    
+    
+    always {
+        
+        // set default values to drive
+        rd1 = 0
+        rd2 = 0
+        p1_lives_out = 0
+        p2_lives_out = 0
+        current_colour_out = 0
+        
+        // drive dffs
+        p1_lives.d = p1_lives.q
+        p2_lives.d = p2_lives.q
+        
+        current_colour.d = current_colour.q
+        
+        p1_colour.d = p1_colour.q
+        p2_colour.d = p2_colour.q
+        
+        p1_correct.d = p1_correct.q
+        p2_correct.d = p2_correct.q
+        
+        p1_alive.d = p1_alive.q
+        p2_alive.d = p2_alive.q
+        
+        
+        
+        // write port
+        if (we){  // only write when we is 1
+            case(wa){
+                b0000:
+                    p1_lives.d = write_data   // register 0, store p1 lives
+                
+                b0001: 
+                    p2_lives.d = write_data   // register 1, store p2 lives
+                
+                b0010:
+                    current_colour.d = write_data // register 2, store current colour that is displayed
+                
+                b0011:
+                    p1_colour.d = write_data  // register 3, store p1's colour input
+            
+                b0100:
+                    p2_colour.d= write_data   // register 4, store p2's colour input
+                     
+                b0101:
+                    p1_correct.d = write_data // register 5, store the result of CMPEQ when checking if p1 is correct
+                
+                b0110:
+                    p2_correct.d = write_data // register 6, store the result of CMPEQ when checking if p2 is correct
+                
+                b0111:
+                    p1_alive.d = write_data // register 7, store the result of CMPLT when checking if p1 is alive
+                
+                b1000:
+                    p2_alive.d = write_data // register 8, store the result of CMPLT when checking if p2 is alive
+            }
+        }
+            
+        // read port 1
+            case(ra1){
+                b0000:
+                    rd1 = p1_lives.q  // register 0
+                
+                b0001:
+                    rd1 = p2_lives.q  // register 1
+                
+                b0010:
+                    rd1 = current_colour.q  // for debugging register 2
+                
+                b0011:
+                    rd1 = p1_colour.q  // register 3
+                
+                b0100:
+                    rd1 = p2_colour.q  // register 4
+                
+                b0101:
+                    rd1 = p1_correct.q // register 5
+                
+                b0110:
+                    rd1 = p2_correct.q // register 6
+                
+                b0111:
+                    rd1 = p1_alive.q   // register 7
+                
+                b1000:
+                    rd1 = p2_alive.q   // register 8
+                
+            }
+        // read port 2
+        
+            case(ra2){
+                b0000:
+                    rd2 = p1_lives.q  // register 0
+                
+                b0001:
+                    rd2 = p2_lives.q  // register 1
+                
+                b0010:
+                    rd2 = current_colour.q  // for debugging register 2
+                
+                b0011:
+                    rd2 = p1_colour.q  // register 3
+                
+                b0100:
+                    rd2 = p2_colour.q  // register 4
+                
+                b0101:
+                    rd2 = p1_correct.q // register 5
+                
+                b0110:
+                    rd2 = p2_correct.q // register 6
+                
+                b0111:
+                    rd2 = p1_alive.q   // register 7
+                
+                b1000:
+                    rd2 = p2_alive.q   // register 8                
+            }
+            p1_lives_out = p1_lives.q  // data needed for display
+            p2_lives_out = p2_lives.q  // data needed for display     
+            current_colour_out = current_colour.q // data needed for display
+        
+        
+    }
+}

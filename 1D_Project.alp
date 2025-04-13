@@ -1,0 +1,109 @@
+{
+    "project": {
+        "type": "V1.3",
+        "projectName": "1D_Project",
+        "board": "Alchitry Au",
+        "sourceFiles": [
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "source/alchitry_top.luc"
+                },
+                "top": true
+            },
+            {
+                "file": {
+                    "type": "Component",
+                    "path": "Conditioning/reset_conditioner.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "source/regfile.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "source/game_control_unit.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "source/alu_unit.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "Component",
+                    "path": "Miscellaneous/pipeline.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "Component",
+                    "path": "Pulses/edge_detector.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "Component",
+                    "path": "Conditioning/button_conditioner.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "source/ws2812b_driver.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "source/static_mode.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "source/datapath.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "source/pn_gen.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "source/variable_timer.luc"
+                }
+            },
+            {
+                "file": {
+                    "type": "Component",
+                    "path": "Miscellaneous/counter.luc"
+                }
+            }
+        ],
+        "constraintFiles": [
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "constraint/io_v1_pulldown.acf"
+                }
+            },
+            {
+                "file": {
+                    "type": "DiskFile",
+                    "path": "constraint/alchitry.acf"
+                }
+            }
+        ],
+        "ipCores": []
+    }
+}
