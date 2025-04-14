@@ -7,6 +7,7 @@
 module alchitry_top (
         input wire clk,
         input wire rst_n,
+        input wire game_reset,
         output reg [7:0] led,
         input wire usb_rx,
         output reg usb_tx,
@@ -16,9 +17,17 @@ module alchitry_top (
         input wire player_2_red_button,
         input wire player_2_green_button,
         input wire player_2_blue_button,
-        output reg show_red,
-        output reg show_green,
-        output reg show_blue,
+        output reg player_1_life_1,
+        output reg player_1_life_2,
+        output reg player_1_life_3,
+        output reg player_1_life_4,
+        output reg player_1_life_5,
+        output reg player_2_life_1,
+        output reg player_2_life_2,
+        output reg player_2_life_3,
+        output reg player_2_life_4,
+        output reg player_2_life_5,
+        output reg arcade_buttons_light,
         output reg [2:0][7:0] io_led,
         output reg [7:0] io_segment,
         output reg [3:0] io_select,
@@ -27,44 +36,16 @@ module alchitry_top (
         output reg data
     );
     logic rst;
-    logic [1:0] colour_value;
-    localparam _MP_STAGES_1342033344 = 3'h4;
+    localparam _MP_STAGES_1345061168 = 3'h4;
     logic M_reset_cond_in;
     logic M_reset_cond_out;
     
     reset_conditioner #(
-        .STAGES(_MP_STAGES_1342033344)
+        .STAGES(_MP_STAGES_1345061168)
     ) reset_cond (
         .clk(clk),
         .in(M_reset_cond_in),
         .out(M_reset_cond_out)
-    );
-    
-    
-    logic [3:0] M_reg_wa;
-    logic M_reg_we;
-    logic [31:0] M_reg_write_data;
-    logic [3:0] M_reg_ra1;
-    logic [3:0] M_reg_ra2;
-    logic [31:0] M_reg_rd1;
-    logic [31:0] M_reg_rd2;
-    logic [31:0] M_reg_p1_lives_out;
-    logic [31:0] M_reg_p2_lives_out;
-    logic [31:0] M_reg_current_colour_out;
-    
-    regfile L_reg (
-        .clk(clk),
-        .rst(rst),
-        .wa(M_reg_wa),
-        .we(M_reg_we),
-        .write_data(M_reg_write_data),
-        .ra1(M_reg_ra1),
-        .ra2(M_reg_ra2),
-        .rd1(M_reg_rd1),
-        .rd2(M_reg_rd2),
-        .p1_lives_out(M_reg_p1_lives_out),
-        .p2_lives_out(M_reg_p2_lives_out),
-        .current_colour_out(M_reg_current_colour_out)
     );
     
     
@@ -77,6 +58,7 @@ module alchitry_top (
     logic [2:0] M_game_datapath_current_p1_lives;
     logic M_game_datapath_is_player_1_correct;
     logic [2:0] M_game_datapath_current_p2_lives;
+    logic M_game_datapath_arcade_buttons_light_up;
     
     datapath game_datapath (
         .player_1_red_or_start_button(player_1_red_or_start_button),
@@ -96,67 +78,27 @@ module alchitry_top (
         .is_player_2_correct(M_game_datapath_is_player_2_correct),
         .current_p1_lives(M_game_datapath_current_p1_lives),
         .is_player_1_correct(M_game_datapath_is_player_1_correct),
-        .current_p2_lives(M_game_datapath_current_p2_lives)
-    );
-    
-    
-    localparam _MP_COLUMN_DIMENSION_1178771676 = 16'h1e;
-    localparam _MP_ROW_DIMENSION_1178771676 = 16'h1;
-    localparam _MP_PIXEL_COUNT_1178771676 = 16'h1e;
-    localparam _MP_BUFFER_SIZE_1178771676 = 11'h400;
-    logic [7:0] M_ws2812b_display_colour_led;
-    logic [2:0][7:0] M_ws2812b_display_colour_io_led;
-    logic [7:0] M_ws2812b_display_colour_io_segment;
-    logic [3:0] M_ws2812b_display_colour_io_select;
-    logic M_ws2812b_display_colour_data;
-    logic [1:0] M_ws2812b_display_colour_debug_colour_choice;
-    logic [2:0] M_ws2812b_display_colour_debug_colour_choice_mux;
-    
-    static_mode #(
-        .COLUMN_DIMENSION(_MP_COLUMN_DIMENSION_1178771676),
-        .ROW_DIMENSION(_MP_ROW_DIMENSION_1178771676),
-        .PIXEL_COUNT(_MP_PIXEL_COUNT_1178771676),
-        .BUFFER_SIZE(_MP_BUFFER_SIZE_1178771676)
-    ) ws2812b_display_colour (
-        .clk(clk),
-        .rst(rst),
-        .io_button(io_button),
-        .colour_choice(colour_value),
-        .led(M_ws2812b_display_colour_led),
-        .io_led(M_ws2812b_display_colour_io_led),
-        .io_segment(M_ws2812b_display_colour_io_segment),
-        .io_select(M_ws2812b_display_colour_io_select),
-        .data(M_ws2812b_display_colour_data),
-        .debug_colour_choice(M_ws2812b_display_colour_debug_colour_choice),
-        .debug_colour_choice_mux(M_ws2812b_display_colour_debug_colour_choice_mux)
+        .current_p2_lives(M_game_datapath_current_p2_lives),
+        .arcade_buttons_light_up(M_game_datapath_arcade_buttons_light_up)
     );
     
     
     always @* begin
-        colour_value = 2'h1;
-        show_red = 1'h0;
-        show_green = 1'h0;
-        show_blue = 1'h0;
+        player_1_life_1 = 1'h0;
+        player_1_life_2 = 1'h0;
+        player_1_life_3 = 1'h0;
+        player_1_life_4 = 1'h0;
+        player_1_life_5 = 1'h0;
+        player_2_life_1 = 1'h0;
+        player_2_life_2 = 1'h0;
+        player_2_life_3 = 1'h0;
+        player_2_life_4 = 1'h0;
+        player_2_life_5 = 1'h0;
         data = 1'h0;
         io_segment = 1'h0;
         io_select = 4'h0;
         io_led = {{8'h0, 8'h0, 8'h0}};
         led = 8'h0;
-        M_reg_wa = 1'h0;
-        M_reg_we = 1'h0;
-        M_reg_write_data = 1'h0;
-        M_reg_ra1 = 1'h0;
-        M_reg_ra2 = 1'h0;
-        if (io_dip[1'h0][2'h3]) begin
-            M_reg_wa = 4'h2;
-            M_reg_we = 1'h1;
-            io_led[2'h2] = M_reg_p1_lives_out[3'h7:1'h0];
-            M_reg_we = 1'h0;
-            M_reg_wa = 1'h0;
-            M_reg_ra1 = 4'h3;
-            M_reg_ra2 = 4'h2;
-            io_led[2'h2][3'h7:3'h6] = M_reg_rd2[1'h1:1'h0];
-        end
         io_led[1'h0][1'h0] = player_1_red_or_start_button;
         io_led[1'h0][1'h1] = player_1_green_button;
         io_led[1'h0][2'h2] = player_1_blue_button;
@@ -168,24 +110,105 @@ module alchitry_top (
         data = M_game_datapath_ws2812b_data;
         io_led[2'h2] = M_game_datapath_current_state;
         
-        case (M_game_datapath_debuggerino)
-            2'h0: begin
-                show_red = 1'h1;
-                show_green = 1'h0;
-                show_blue = 1'h0;
+        case (M_game_datapath_current_p1_lives)
+            3'h5: begin
+                player_1_life_1 = 1'h1;
+                player_1_life_2 = 1'h1;
+                player_1_life_3 = 1'h1;
+                player_1_life_4 = 1'h1;
+                player_1_life_5 = 1'h1;
             end
-            2'h1: begin
-                show_red = 1'h0;
-                show_green = 1'h1;
-                show_blue = 1'h0;
+            3'h4: begin
+                player_1_life_1 = 1'h1;
+                player_1_life_2 = 1'h1;
+                player_1_life_3 = 1'h1;
+                player_1_life_4 = 1'h1;
+                player_1_life_5 = 1'h0;
+            end
+            2'h3: begin
+                player_1_life_1 = 1'h1;
+                player_1_life_2 = 1'h1;
+                player_1_life_3 = 1'h1;
+                player_1_life_4 = 1'h0;
+                player_1_life_5 = 1'h0;
             end
             2'h2: begin
-                show_red = 1'h0;
-                show_green = 1'h0;
-                show_blue = 1'h1;
+                player_1_life_1 = 1'h1;
+                player_1_life_2 = 1'h1;
+                player_1_life_3 = 1'h0;
+                player_1_life_4 = 1'h0;
+                player_1_life_5 = 1'h0;
+            end
+            1'h1: begin
+                player_1_life_1 = 1'h1;
+                player_1_life_2 = 1'h0;
+                player_1_life_3 = 1'h0;
+                player_1_life_4 = 1'h0;
+                player_1_life_5 = 1'h0;
+            end
+            1'h0: begin
+                player_1_life_1 = 1'h0;
+                player_1_life_2 = 1'h0;
+                player_1_life_3 = 1'h0;
+                player_1_life_4 = 1'h0;
+                player_1_life_5 = 1'h0;
             end
         endcase
-        M_reset_cond_in = ~rst_n;
+        
+        case (M_game_datapath_current_p2_lives)
+            3'h5: begin
+                player_2_life_1 = 1'h1;
+                player_2_life_2 = 1'h1;
+                player_2_life_3 = 1'h1;
+                player_2_life_4 = 1'h1;
+                player_2_life_5 = 1'h1;
+            end
+            3'h4: begin
+                player_2_life_1 = 1'h1;
+                player_2_life_2 = 1'h1;
+                player_2_life_3 = 1'h1;
+                player_2_life_4 = 1'h1;
+                player_2_life_5 = 1'h0;
+            end
+            2'h3: begin
+                player_2_life_1 = 1'h1;
+                player_2_life_2 = 1'h1;
+                player_2_life_3 = 1'h1;
+                player_2_life_4 = 1'h0;
+                player_2_life_5 = 1'h0;
+            end
+            2'h2: begin
+                player_2_life_1 = 1'h1;
+                player_2_life_2 = 1'h1;
+                player_2_life_3 = 1'h0;
+                player_2_life_4 = 1'h0;
+                player_2_life_5 = 1'h0;
+            end
+            1'h1: begin
+                player_2_life_1 = 1'h1;
+                player_2_life_2 = 1'h0;
+                player_2_life_3 = 1'h0;
+                player_2_life_4 = 1'h0;
+                player_2_life_5 = 1'h0;
+            end
+            1'h0: begin
+                player_2_life_1 = 1'h0;
+                player_2_life_2 = 1'h0;
+                player_2_life_3 = 1'h0;
+                player_2_life_4 = 1'h0;
+                player_2_life_5 = 1'h0;
+            end
+        endcase
+        
+        case (M_game_datapath_arcade_buttons_light_up)
+            1'h1: begin
+                arcade_buttons_light = 1'h1;
+            end
+            default: begin
+                arcade_buttons_light = 1'h0;
+            end
+        endcase
+        M_reset_cond_in = ~rst_n | ~game_reset;
         rst = M_reset_cond_out;
         usb_tx = usb_rx;
     end

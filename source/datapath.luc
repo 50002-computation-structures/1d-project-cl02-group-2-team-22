@@ -20,7 +20,9 @@ module datapath (
     output current_p1_lives[3],
     
     output is_player_1_correct,
-    output current_p2_lives[3]
+    output current_p2_lives[3],
+    
+    output arcade_buttons_light_up
      
     
 ) {
@@ -131,20 +133,22 @@ module datapath (
         debuggerino = regfile.current_colour_out[1:0]
         //intermediate_debuggerino = regfile.current_colour_out[1:0]
         intermediate_debuggerino = gameStates.debug_current_colour_choice   // from game_control_unit
-        intermediate_debug = intermediate_debuggerino      
+        intermediate_debug = intermediate_debuggerino   
+           
         gameStates.current_colour_choice = regfile.current_colour_out[1:0]
         ws2812b_data = gameStates.data
         
         current_state = gameStates.current_game_state_number
         player_button_input = gameStates.debug_player_button_input
         
-
+        
         current_p2_lives = gameStates.p2_current_lives_out
         is_player_1_correct = gameStates.is_p1_correct_out
         
         current_p1_lives = gameStates.p1_current_lives_out
         is_player_2_correct = gameStates.is_p2_correct_out
         
+        arcade_buttons_light_up = gameStates.arcade_buttons_light_up  // to light up arcade buttons when game is over
         
     }
 }

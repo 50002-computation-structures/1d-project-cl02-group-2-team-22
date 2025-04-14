@@ -11,17 +11,17 @@ module pipeline #(
         input wire in,
         output reg out
     );
-    logic [31:0] R_28a00f2f_i;
-    logic [31:0] RR_28a00f2f_i;
+    logic [31:0] R_60e826e8_i;
+    logic [31:0] RR_60e826e8_i;
     logic [(DEPTH)-1:0] D_pipe_d, D_pipe_q = 0;
     always @* begin
         D_pipe_d = D_pipe_q;
         
         D_pipe_d[1'h0] = in;
         out = D_pipe_q[$bits(D_pipe_q) - 1'h1];
-        for (RR_28a00f2f_i = 0; RR_28a00f2f_i < DEPTH - 1'h1; RR_28a00f2f_i = RR_28a00f2f_i + 1) begin
-      R_28a00f2f_i = (0) + RR_28a00f2f_i * (1);
-            D_pipe_d[R_28a00f2f_i + 1'h1] = D_pipe_q[R_28a00f2f_i];
+        for (RR_60e826e8_i = 0; RR_60e826e8_i < DEPTH - 1'h1; RR_60e826e8_i = RR_60e826e8_i + 1) begin
+      R_60e826e8_i = (0) + RR_60e826e8_i * (1);
+            D_pipe_d[R_60e826e8_i + 1'h1] = D_pipe_q[R_60e826e8_i];
         end
     end
     

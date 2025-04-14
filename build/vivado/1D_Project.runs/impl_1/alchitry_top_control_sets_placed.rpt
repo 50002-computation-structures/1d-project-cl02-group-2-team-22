@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2023.2 (win64) Build 4029153 Fri Oct 13 20:14:34 MDT 2023
-| Date         : Sun Apr 13 22:40:34 2025
+| Date         : Tue Apr 15 02:23:20 2025
 | Host         : LAPTOP-G2H00B5B running 64-bit major release  (build 9200)
 | Command      : report_control_sets -verbose -file alchitry_top_control_sets_placed.rpt
 | Design       : alchitry_top
@@ -27,7 +27,7 @@ Table of Contents
 |    Minimum number of control sets                        |    30 |
 |    Addition due to synthesis replication                 |     0 |
 |    Addition due to physical synthesis replication        |     0 |
-| Unused register locations in slices containing registers |    60 |
+| Unused register locations in slices containing registers |    48 |
 +----------------------------------------------------------+-------+
 * Control sets can be merged at opt_design using control_set_merge or merge_equivalent_drivers
 ** Run report_qor_suggestions for automated merging and remapping suggestions
@@ -46,8 +46,8 @@ Table of Contents
 | >= 8 to < 10       |     0 |
 | >= 10 to < 12      |     0 |
 | >= 12 to < 14      |     1 |
-| >= 14 to < 16      |     8 |
-| >= 16              |    15 |
+| >= 14 to < 16      |     7 |
+| >= 16              |    16 |
 +--------------------+-------+
 * Control sets can be remapped at either synth_design or opt_design
 
@@ -58,12 +58,12 @@ Table of Contents
 +--------------+-----------------------+------------------------+-----------------+--------------+
 | Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
 +--------------+-----------------------+------------------------+-----------------+--------------+
-| No           | No                    | No                     |              26 |           16 |
+| No           | No                    | No                     |              26 |           13 |
 | No           | No                    | Yes                    |               4 |            2 |
-| No           | Yes                   | No                     |              36 |           13 |
-| Yes          | No                    | No                     |              34 |           10 |
+| No           | Yes                   | No                     |              40 |           15 |
+| Yes          | No                    | No                     |              32 |           13 |
 | Yes          | No                    | Yes                    |               0 |            0 |
-| Yes          | Yes                   | No                     |             552 |          199 |
+| Yes          | Yes                   | No                     |             554 |          201 |
 +--------------+-----------------------+------------------------+-----------------+--------------+
 
 
@@ -77,32 +77,32 @@ Table of Contents
 |  clk_IBUF_BUFG | game_datapath/gameStates/D_current_state_number_q[3]_i_1_n_0                                | reset_cond/Q[0]                                                                |                2 |              4 |         2.00 |
 |  clk_IBUF_BUFG | game_datapath/gameStates/colour_display/driver/D_bit_ctr_d                                  | reset_cond/Q[0]                                                                |                2 |              5 |         2.50 |
 |  clk_IBUF_BUFG | game_datapath/gameStates/colour_display/driver/D_pixel_address_ctr_q[4]_i_1_n_0             | reset_cond/Q[0]                                                                |                1 |              5 |         5.00 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/forLoop_idx_0_1380194573[4].io_button_cond/E[0]                    | reset_cond/Q[0]                                                                |                3 |              5 |         1.67 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/forLoop_idx_0_2058735117[4].io_button_cond/E[0]                    | reset_cond/Q[0]                                                                |                3 |              5 |         1.67 |
 |  clk_IBUF_BUFG | game_datapath/gameStates/colour_display/driver/D_ctr_d                                      | reset_cond/Q[0]                                                                |                3 |              7 |         2.33 |
 |  clk_IBUF_BUFG | game_datapath/gameStates/colour_display/driver/D_rst_ctr_q[0]_i_1_n_0                       | reset_cond/Q[0]                                                                |                4 |             13 |         3.25 |
-|  clk_IBUF_BUFG | game_datapath/rngesus/generate_next_number_clock/D_stage_q_reg[3]                           | reset_cond/Q[0]                                                                |                5 |             14 |         2.80 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p2_blue_btn_cond/D_ctr_q_reg[13]_0                                 | game_datapath/gameStates/p2_blue_btn_cond/sync/D_pipe_q_reg[1]_0               |                4 |             14 |         3.50 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p2_green_btn_cond/D_ctr_q_reg[13]_0                                | game_datapath/gameStates/p2_green_btn_cond/sync/D_pipe_q_reg[1]_0              |                4 |             14 |         3.50 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p2_red_btn_cond/D_ctr_q[0]_i_2__6_n_0                              | game_datapath/gameStates/p2_red_btn_cond/sync/D_pipe_q_reg[1]_0                |                4 |             14 |         3.50 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/forLoop_idx_0_1380194573[4].io_button_cond/sel                     | game_datapath/gameStates/forLoop_idx_0_1380194573[4].io_button_cond/sync/clear |                4 |             14 |         3.50 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_blue_btn_cond/D_ctr_q_reg[12]_0                                 | game_datapath/gameStates/p1_blue_btn_cond/sync/D_pipe_q_reg[1]_0               |                4 |             14 |         3.50 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_green_btn_cond/D_ctr_q_reg[13]_0                                | game_datapath/gameStates/p1_green_btn_cond/sync/D_pipe_q_reg[1]_0              |                4 |             14 |         3.50 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/D_ctr_q[0]_i_2__3_n_0                     | game_datapath/gameStates/p1_red_or_start_btn_cond/sync/D_pipe_q_reg[1]_0       |                4 |             14 |         3.50 |
-|  clk_IBUF_BUFG | game_datapath/rngesus/edge_detector_seed/M_edge_detector_seed_out                           |                                                                                |                4 |             16 |         4.00 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p2_red_btn_cond/D_ctr_q_reg[7]_0                                   | game_datapath/gameStates/p2_red_btn_cond/sync/D_pipe_q_reg[1]_0                |                4 |             14 |         3.50 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_green_btn_cond/D_ctr_q_reg[1]_0                                 | game_datapath/gameStates/p1_green_btn_cond/sync/D_pipe_q_reg[1]_0              |                4 |             14 |         3.50 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/D_ctr_q_reg[7]_0                          | game_datapath/gameStates/p1_red_or_start_btn_cond/sync/D_pipe_q_reg[1]_0       |                4 |             14 |         3.50 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p2_blue_btn_cond/D_ctr_q_reg[1]_0                                  | game_datapath/gameStates/p2_blue_btn_cond/sync/D_pipe_q_reg[1]_0               |                4 |             14 |         3.50 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p2_green_btn_cond/D_ctr_q_reg[1]_0                                 | game_datapath/gameStates/p2_green_btn_cond/sync/D_pipe_q_reg[1]_0              |                4 |             14 |         3.50 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/forLoop_idx_0_2058735117[4].io_button_cond/sel                     | game_datapath/gameStates/forLoop_idx_0_2058735117[4].io_button_cond/sync/clear |                4 |             14 |         3.50 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_blue_btn_cond/D_ctr_q_reg[1]_0                                  | game_datapath/gameStates/p1_blue_btn_cond/sync/D_pipe_q_reg[1]_0               |                4 |             14 |         3.50 |
+|  clk_IBUF_BUFG | game_datapath/rngesus/seed_clock/M_edge_detector_seed_out                                   |                                                                                |                4 |             16 |         4.00 |
+|  clk_IBUF_BUFG | game_datapath/rngesus/edge_detector_next/D_stage_q_reg[3]                                   |                                                                                |                9 |             16 |         1.78 |
+|  clk_IBUF_BUFG | game_datapath/rngesus/edge_detector_next/D_stage_q_reg[3]                                   | reset_cond/Q[0]                                                                |                6 |             16 |         2.67 |
 |  clk_IBUF_BUFG | game_datapath/gameStates/colour_display/clear_button/D_ctr_q[0]_i_2__2_n_0                  | game_datapath/gameStates/colour_display/clear_button/sync/D_pipe_q_reg[1]_0    |                5 |             17 |         3.40 |
-|  clk_IBUF_BUFG | game_datapath/rngesus/generate_next_number_clock/D_stage_q_reg[3]                           |                                                                                |                6 |             18 |         3.00 |
-|  clk_IBUF_BUFG |                                                                                             |                                                                                |               16 |             26 |         1.62 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/D_stage_q_reg[3]_4[0]                     | reset_cond/Q[0]                                                                |               19 |             32 |         1.68 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/E[0]                                      | reset_cond/Q[0]                                                                |               15 |             32 |         2.13 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/D_stage_q_reg[3]_0[0]                     | reset_cond/Q[0]                                                                |               13 |             32 |         2.46 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/D_stage_q_reg[3]_1[0]                     | reset_cond/Q[0]                                                                |               15 |             32 |         2.13 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/FSM_sequential_D_game_state_q_reg[3]_0[0] | reset_cond/Q[0]                                                                |               12 |             32 |         2.67 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/D_stage_q_reg[3]_2[0]                     | reset_cond/Q[0]                                                                |               15 |             32 |         2.13 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/D_stage_q_reg[3]_5[0]                     | reset_cond/Q[0]                                                                |               12 |             32 |         2.67 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/D_stage_q_reg[3]_3[0]                     | reset_cond/Q[0]                                                                |               12 |             32 |         2.67 |
-|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/D_stage_q_reg[3]_6[0]                     | reset_cond/Q[0]                                                                |               15 |             32 |         2.13 |
-|  clk_IBUF_BUFG |                                                                                             | reset_cond/Q[0]                                                                |               13 |             36 |         2.77 |
-|  clk_IBUF_BUFG | game_datapath/rngesus/edge_detector_next/E[0]                                               | reset_cond/Q[0]                                                                |               18 |             96 |         5.33 |
+|  clk_IBUF_BUFG |                                                                                             |                                                                                |               13 |             26 |         2.00 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p2_red_btn_cond/E[0]                                               | reset_cond/Q[0]                                                                |               11 |             32 |         2.91 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/D_last_q_reg                              | reset_cond/Q[0]                                                                |               14 |             32 |         2.29 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/FSM_sequential_D_game_state_q_reg[0][0]   | reset_cond/Q[0]                                                                |               18 |             32 |         1.78 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/FSM_sequential_D_game_state_q_reg[0]_0[0] | reset_cond/Q[0]                                                                |               11 |             32 |         2.91 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/FSM_sequential_D_game_state_q_reg[0]_8[0] | reset_cond/Q[0]                                                                |               13 |             32 |         2.46 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/FSM_sequential_D_game_state_q_reg[0]_7[0] | reset_cond/Q[0]                                                                |               19 |             32 |         1.68 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/FSM_sequential_D_game_state_q_reg[0]_6[0] | reset_cond/Q[0]                                                                |               15 |             32 |         2.13 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/FSM_sequential_D_game_state_q_reg[0]_5[0] | reset_cond/Q[0]                                                                |               16 |             32 |         2.00 |
+|  clk_IBUF_BUFG | game_datapath/gameStates/p1_red_or_start_btn_cond/FSM_sequential_D_game_state_q_reg[0]_1[0] | reset_cond/Q[0]                                                                |               10 |             32 |         3.20 |
+|  clk_IBUF_BUFG |                                                                                             | reset_cond/Q[0]                                                                |               15 |             40 |         2.67 |
+|  clk_IBUF_BUFG | game_datapath/rngesus/generate_next_number_clock/E[0]                                       | reset_cond/Q[0]                                                                |               20 |             96 |         4.80 |
 +----------------+---------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+------------------+----------------+--------------+
 
 

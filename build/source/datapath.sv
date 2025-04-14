@@ -22,19 +22,20 @@ module datapath (
         output reg is_player_2_correct,
         output reg [2:0] current_p1_lives,
         output reg is_player_1_correct,
-        output reg [2:0] current_p2_lives
+        output reg [2:0] current_p2_lives,
+        output reg arcade_buttons_light_up
     );
     logic [31:0] input_alu_a;
     logic [31:0] input_alu_b;
     logic [1:0] intermediate_debuggerino;
-    localparam _MP_SEED_1107070521 = 30'h286b4b9c;
-    localparam _MP_FAST_CLOCK_DIV_1107070521 = 4'hc;
+    localparam _MP_SEED_760441106 = 30'h286b4b9c;
+    localparam _MP_FAST_CLOCK_DIV_760441106 = 4'hc;
     logic M_rngesus_out;
     logic [15:0] M_rngesus_debug;
     
     variable_timer #(
-        .SEED(_MP_SEED_1107070521),
-        .FAST_CLOCK_DIV(_MP_FAST_CLOCK_DIV_1107070521)
+        .SEED(_MP_SEED_760441106),
+        .FAST_CLOCK_DIV(_MP_FAST_CLOCK_DIV_760441106)
     ) rngesus (
         .clk(clk),
         .rst(rst),
@@ -62,6 +63,7 @@ module datapath (
     logic [2:0] M_gameStates_p2_current_lives_out;
     logic M_gameStates_is_p1_correct_out;
     logic M_gameStates_is_p2_correct_out;
+    logic M_gameStates_arcade_buttons_light_up;
     logic [1:0] M_gameStates_debug_current_colour_choice;
     logic [1:0] M_gameStates_game_colour_led_value;
     logic [2:0] M_gameStates_debug_player_button_input;
@@ -95,6 +97,7 @@ module datapath (
         .p2_current_lives_out(M_gameStates_p2_current_lives_out),
         .is_p1_correct_out(M_gameStates_is_p1_correct_out),
         .is_p2_correct_out(M_gameStates_is_p2_correct_out),
+        .arcade_buttons_light_up(M_gameStates_arcade_buttons_light_up),
         .debug_current_colour_choice(M_gameStates_debug_current_colour_choice),
         .game_colour_led_value(M_gameStates_game_colour_led_value),
         .debug_player_button_input(M_gameStates_debug_player_button_input)
@@ -213,6 +216,7 @@ module datapath (
         is_player_1_correct = M_gameStates_is_p1_correct_out;
         current_p1_lives = M_gameStates_p1_current_lives_out;
         is_player_2_correct = M_gameStates_is_p2_correct_out;
+        arcade_buttons_light_up = M_gameStates_arcade_buttons_light_up;
     end
     
     

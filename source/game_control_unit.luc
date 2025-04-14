@@ -30,9 +30,10 @@ module game_control_unit (
     
     output p1_current_lives_out[3],  // send to datapth which is then used in alchitry top for tracking p1 lives
     output p2_current_lives_out[3],  // send to datapth which is then used in alchitry top for tracking p2 lives
-    output is_p1_correct_out, // send to datapath with is then used in alchitry tp for tracking if p1 is correct
-    output is_p2_correct_out, // send to datapath with is then used in alchitry tp for tracking if p2 is correct
+    output is_p1_correct_out, // send to datapath which is then used in alchitry top for tracking if p1 is correct
+    output is_p2_correct_out, // send to datapath which is then used in alchitry top for tracking if p2 is correct
     
+    output arcade_buttons_light_up,   // send to datapath which is then used in alchitry top to see if buttons light up 
     
     output debug_current_colour_choice[2],
     output game_colour_led_value[2],
@@ -41,7 +42,8 @@ module game_control_unit (
 ) {
     enum GameStates {
         IDLE,
-        START,
+        START1,  // show player 2 lives
+        START2,  // show player 1 lives
         STORE_RNG_COLOUR,
         SHOW_COLOUR,
         WAIT_FOR_PLAYER_INPUT,
@@ -64,8 +66,7 @@ module game_control_unit (
         
         
         
-        GAME_OVER,
-        DUMMY_CHECK
+        GAME_OVER
         
                 
     }
@@ -98,6 +99,7 @@ module game_control_unit (
     dff current_colour[2](#INIT(3),.clk(clk), .rst(rst))   // to hold the current colour value
     dff game_state[$width(GameStates)](#INIT(GameStates.IDLE), .clk(clk), .rst(rst))  // register to store current state of game
     
+    dff arcade_buttons(#INIT(0),. clk(clk), .rst(rst))  // to decide if the arcade buttons light up or not
     
     .clk(clk){
         // Use this to check if button has been pressed
@@ -141,6 +143,7 @@ module game_control_unit (
         led = 8h00              // LED set to off
         colour_choice = current_colour_choice  // DEBUG THE COLOUR CHOICE
         debug_current_colour_choice = 0
+        arcade_buttons_light_up = 0
         
         // drive dffs
         current_state_number.d = current_state_number.q
@@ -150,6 +153,7 @@ module game_control_unit (
         is_player_2_correct.d = is_player_2_correct.q
         p1_current_lives.d = p1_current_lives.q
         p2_current_lives.d = p2_current_lives.q
+        arcade_buttons.d = arcade_buttons.q
         
         // standard setting unless overriden by each case
         alufn = 0
@@ -193,8 +197,14 @@ module game_control_unit (
         }
         else{
             case(game_state.q){
-                
                 GameStates.IDLE:
+                    current_state_number.d = 0
+                    if (io_button_edge.out[4]){
+                        game_state.d = GameStates.START1
+                    } 
+                    
+                
+                GameStates.START1:
                     //led[0] = 1
                     regfile_ra2 = 4h1   // read from register 1, which has p2 lives
                     p2_current_lives.d = regfile_rd2[2:0]  // should be set to whatever regfile register 1 is intialised to 
@@ -202,14 +212,14 @@ module game_control_unit (
                     regfile_we = 0
                     //io_led[0][1] = player_1_red_or_start_button_edge.out
                     //io_led[1][1] = io_button_edge.out[4]
-                    if (io_button_edge.out[4]){
-                        game_state.d = GameStates.START
-                    } 
+                    //if (player_2_red_button_edge.out | io_button_edge.out[4]){
+                    game_state.d = GameStates.START2
+                    //} 
                 
-                GameStates.START:
+                GameStates.START2:
                     //led[1] = 1
                     regfile_ra2 = 4h0 // read from register 0, which has p1 lives
-                    p1_current_lives.d = regfile_rd2[1:0] // should be set to whatever regfile register 0 is intialised to 
+                    p1_current_lives.d = regfile_rd2[2:0] // should be set to whatever regfile register 0 is intialised to 
                     current_state_number.d = 1
                     regfile_we = 0
                     game_state.d = GameStates.STORE_RNG_COLOUR
@@ -230,15 +240,6 @@ module game_control_unit (
                         regfile_we = 1
                         game_state.d = GameStates.SHOW_COLOUR
                     }
-                GameStates.DUMMY_CHECK:
-                    //led[3] = 1
-                    current_state_number.d = 3
-                    regfile_we = 0
-                    regfile_wa = 0
-                    regfile_ra2 = b0010
-                    current_colour.d = regfile_rd2[1:0]  // test if it works
-                                
-                
                 
                 
                 GameStates.SHOW_COLOUR:
@@ -551,6 +552,7 @@ module game_control_unit (
                 
                 GameStates.GAME_OVER:
                         current_state_number.d = 13
+                        arcade_buttons.d = 1
                         current_colour.d = 3 // ws2812b strip is off to indicate game over
                         
 
@@ -588,7 +590,7 @@ module game_control_unit (
             game_colour_led_value = current_colour.q // to display the current game colour, R G or B
                                                      // not using ws2812b here, using individual LEDs
             
-            
+            arcade_buttons_light_up = arcade_buttons.q // to check whether the arcade buttons light up, signifying game has ended
         }
         
     }

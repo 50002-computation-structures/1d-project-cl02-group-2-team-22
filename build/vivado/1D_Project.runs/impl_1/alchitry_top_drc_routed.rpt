@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2023.2 (win64) Build 4029153 Fri Oct 13 20:14:34 MDT 2023
-| Date         : Sun Apr 13 22:40:51 2025
+| Date         : Tue Apr 15 02:23:39 2025
 | Host         : LAPTOP-G2H00B5B running 64-bit major release  (build 9200)
 | Command      : report_drc -file alchitry_top_drc_routed.rpt -pb alchitry_top_drc_routed.pb -rpx alchitry_top_drc_routed.rpx
 | Design       : alchitry_top
@@ -24,28 +24,33 @@ Table of Contents
       Design limits: <entire design considered>
            Ruledeck: default
              Max violations: <unlimited>
-             Violations found: 3
+             Violations found: 4
 +--------+----------+------------------------------------------------+------------+
 | Rule   | Severity | Description                                    | Violations |
 +--------+----------+------------------------------------------------+------------+
-| PLIO-3 | Warning  | Placement Constraints Check for IO constraints | 3          |
+| PLIO-3 | Warning  | Placement Constraints Check for IO constraints | 4          |
 +--------+----------+------------------------------------------------+------------+
 
 2. REPORT DETAILS
 -----------------
 PLIO-3#1 Warning
 Placement Constraints Check for IO constraints  
-Partially locked IO Bus is found. Following components of the IO Bus io_button[4:0] are not locked:  io_button[0]
+Partially locked IO Bus is found. Following components of the IO Bus io_button[4:0] are not locked:  io_button[2] io_button[0]
 Related violations: <none>
 
 PLIO-3#2 Warning
 Placement Constraints Check for IO constraints  
-Partially locked IO Bus is found. Following components of the IO Bus io_dip[0][7:0] are not locked:  io_dip[0][2] io_dip[0][0]
+Partially locked IO Bus is found. Following components of the IO Bus io_dip[0][7:0] are not locked:  io_dip[0][7] io_dip[0][6] io_dip[0][2] io_dip[0][1] io_dip[0][0]
 Related violations: <none>
 
 PLIO-3#3 Warning
 Placement Constraints Check for IO constraints  
-Partially locked IO Bus is found. Following components of the IO Bus io_dip[2][7:0] are not locked:  io_dip[2][7] io_dip[2][5] io_dip[2][4]
+Partially locked IO Bus is found. Following components of the IO Bus io_dip[1][7:0] are not locked:  io_dip[1][6] io_dip[1][5] io_dip[1][4] io_dip[1][3] io_dip[1][2] io_dip[1][1] io_dip[1][0]
+Related violations: <none>
+
+PLIO-3#4 Warning
+Placement Constraints Check for IO constraints  
+Partially locked IO Bus is found. Following components of the IO Bus io_dip[2][7:0] are not locked:  io_dip[2][4]
 Related violations: <none>
 
 

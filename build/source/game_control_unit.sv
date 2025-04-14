@@ -33,42 +33,43 @@ module game_control_unit (
         output reg [2:0] p2_current_lives_out,
         output reg is_p1_correct_out,
         output reg is_p2_correct_out,
+        output reg arcade_buttons_light_up,
         output reg [1:0] debug_current_colour_choice,
         output reg [1:0] game_colour_led_value,
         output reg [2:0] debug_player_button_input
     );
     localparam E_GameStates_IDLE = 5'h0;
-    localparam E_GameStates_START = 5'h1;
-    localparam E_GameStates_STORE_RNG_COLOUR = 5'h2;
-    localparam E_GameStates_SHOW_COLOUR = 5'h3;
-    localparam E_GameStates_WAIT_FOR_PLAYER_INPUT = 5'h4;
-    localparam E_GameStates_CHECK_P1_ANS = 5'h5;
-    localparam E_GameStates_CHECK_P2_ANS = 5'h6;
-    localparam E_GameStates_BRANCH_P1_ANS = 5'h7;
-    localparam E_GameStates_BRANCH_P2_ANS = 5'h8;
-    localparam E_GameStates_RESET_P1_CORRECT = 5'h9;
-    localparam E_GameStates_RESET_P2_CORRECT = 5'ha;
-    localparam E_GameStates_DEBUG_P1_CORRECT_RESET = 5'hb;
-    localparam E_GameStates_DEBUG_P2_CORRECT_RESET = 5'hc;
-    localparam E_GameStates_P1_CORRECT_MINUS_P2_LIVES = 5'hd;
-    localparam E_GameStates_P2_CORRECT_MINUS_P1_LIVES = 5'he;
-    localparam E_GameStates_UPDATE_P2_LIVES = 5'hf;
-    localparam E_GameStates_UPDATE_P1_LIVES = 5'h10;
-    localparam E_GameStates_CHECK_P2_ALIVE = 5'h11;
-    localparam E_GameStates_CHECK_P1_ALIVE = 5'h12;
-    localparam E_GameStates_BRANCH_P2_ALIVE = 5'h13;
-    localparam E_GameStates_BRANCH_P1_ALIVE = 5'h14;
-    localparam E_GameStates_GAME_OVER = 5'h15;
-    localparam E_GameStates_DUMMY_CHECK = 5'h16;
+    localparam E_GameStates_START1 = 5'h1;
+    localparam E_GameStates_START2 = 5'h2;
+    localparam E_GameStates_STORE_RNG_COLOUR = 5'h3;
+    localparam E_GameStates_SHOW_COLOUR = 5'h4;
+    localparam E_GameStates_WAIT_FOR_PLAYER_INPUT = 5'h5;
+    localparam E_GameStates_CHECK_P1_ANS = 5'h6;
+    localparam E_GameStates_CHECK_P2_ANS = 5'h7;
+    localparam E_GameStates_BRANCH_P1_ANS = 5'h8;
+    localparam E_GameStates_BRANCH_P2_ANS = 5'h9;
+    localparam E_GameStates_RESET_P1_CORRECT = 5'ha;
+    localparam E_GameStates_RESET_P2_CORRECT = 5'hb;
+    localparam E_GameStates_DEBUG_P1_CORRECT_RESET = 5'hc;
+    localparam E_GameStates_DEBUG_P2_CORRECT_RESET = 5'hd;
+    localparam E_GameStates_P1_CORRECT_MINUS_P2_LIVES = 5'he;
+    localparam E_GameStates_P2_CORRECT_MINUS_P1_LIVES = 5'hf;
+    localparam E_GameStates_UPDATE_P2_LIVES = 5'h10;
+    localparam E_GameStates_UPDATE_P1_LIVES = 5'h11;
+    localparam E_GameStates_CHECK_P2_ALIVE = 5'h12;
+    localparam E_GameStates_CHECK_P1_ALIVE = 5'h13;
+    localparam E_GameStates_BRANCH_P2_ALIVE = 5'h14;
+    localparam E_GameStates_BRANCH_P1_ALIVE = 5'h15;
+    localparam E_GameStates_GAME_OVER = 5'h16;
     localparam CLK_FREQ = 24'h989680;
     localparam COLUMN_DIMENSION = 5'h1e;
     localparam ROW_DIMENSION = 5'h1;
     localparam PIXEL_COUNT = 10'h1e;
     logic [1:0] colour_choice;
-    localparam _MP_COLUMN_DIMENSION_935203181 = 5'h1e;
-    localparam _MP_ROW_DIMENSION_935203181 = 5'h1;
-    localparam _MP_PIXEL_COUNT_935203181 = 10'h1e;
-    localparam _MP_BUFFER_SIZE_935203181 = 11'h400;
+    localparam _MP_COLUMN_DIMENSION_169349258 = 5'h1e;
+    localparam _MP_ROW_DIMENSION_169349258 = 5'h1;
+    localparam _MP_PIXEL_COUNT_169349258 = 10'h1e;
+    localparam _MP_BUFFER_SIZE_169349258 = 11'h400;
     logic [7:0] M_colour_display_led;
     logic [2:0][7:0] M_colour_display_io_led;
     logic [7:0] M_colour_display_io_segment;
@@ -78,10 +79,10 @@ module game_control_unit (
     logic [2:0] M_colour_display_debug_colour_choice_mux;
     
     static_mode #(
-        .COLUMN_DIMENSION(_MP_COLUMN_DIMENSION_935203181),
-        .ROW_DIMENSION(_MP_ROW_DIMENSION_935203181),
-        .PIXEL_COUNT(_MP_PIXEL_COUNT_935203181),
-        .BUFFER_SIZE(_MP_BUFFER_SIZE_935203181)
+        .COLUMN_DIMENSION(_MP_COLUMN_DIMENSION_169349258),
+        .ROW_DIMENSION(_MP_ROW_DIMENSION_169349258),
+        .PIXEL_COUNT(_MP_PIXEL_COUNT_169349258),
+        .BUFFER_SIZE(_MP_BUFFER_SIZE_169349258)
     ) colour_display (
         .clk(clk),
         .rst(rst),
@@ -105,14 +106,15 @@ module game_control_unit (
     logic [2:0] D_p2_current_lives_d, D_p2_current_lives_q = 0;
     logic [1:0] D_current_colour_d, D_current_colour_q = 2'h3;
     logic [4:0] D_game_state_d, D_game_state_q = 5'h0;
-    localparam _MP_RISE_1288900654 = 1'h1;
-    localparam _MP_FALL_1288900654 = 1'h0;
+    logic D_arcade_buttons_d, D_arcade_buttons_q = 1'h0;
+    localparam _MP_RISE_2142607207 = 1'h1;
+    localparam _MP_FALL_2142607207 = 1'h0;
     logic M_player_1_red_or_start_button_edge_in;
     logic M_player_1_red_or_start_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_1288900654),
-        .FALL(_MP_FALL_1288900654)
+        .RISE(_MP_RISE_2142607207),
+        .FALL(_MP_FALL_2142607207)
     ) player_1_red_or_start_button_edge (
         .clk(clk),
         .in(M_player_1_red_or_start_button_edge_in),
@@ -120,14 +122,14 @@ module game_control_unit (
     );
     
     
-    localparam _MP_RISE_534147416 = 1'h1;
-    localparam _MP_FALL_534147416 = 1'h0;
+    localparam _MP_RISE_579530637 = 1'h1;
+    localparam _MP_FALL_579530637 = 1'h0;
     logic M_player_1_green_button_edge_in;
     logic M_player_1_green_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_534147416),
-        .FALL(_MP_FALL_534147416)
+        .RISE(_MP_RISE_579530637),
+        .FALL(_MP_FALL_579530637)
     ) player_1_green_button_edge (
         .clk(clk),
         .in(M_player_1_green_button_edge_in),
@@ -135,14 +137,14 @@ module game_control_unit (
     );
     
     
-    localparam _MP_RISE_1061144147 = 1'h1;
-    localparam _MP_FALL_1061144147 = 1'h0;
+    localparam _MP_RISE_380351658 = 1'h1;
+    localparam _MP_FALL_380351658 = 1'h0;
     logic M_player_1_blue_button_edge_in;
     logic M_player_1_blue_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_1061144147),
-        .FALL(_MP_FALL_1061144147)
+        .RISE(_MP_RISE_380351658),
+        .FALL(_MP_FALL_380351658)
     ) player_1_blue_button_edge (
         .clk(clk),
         .in(M_player_1_blue_button_edge_in),
@@ -150,14 +152,14 @@ module game_control_unit (
     );
     
     
-    localparam _MP_RISE_1220535208 = 1'h1;
-    localparam _MP_FALL_1220535208 = 1'h0;
+    localparam _MP_RISE_787391839 = 1'h1;
+    localparam _MP_FALL_787391839 = 1'h0;
     logic M_player_2_red_button_edge_in;
     logic M_player_2_red_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_1220535208),
-        .FALL(_MP_FALL_1220535208)
+        .RISE(_MP_RISE_787391839),
+        .FALL(_MP_FALL_787391839)
     ) player_2_red_button_edge (
         .clk(clk),
         .in(M_player_2_red_button_edge_in),
@@ -165,14 +167,14 @@ module game_control_unit (
     );
     
     
-    localparam _MP_RISE_725643729 = 1'h1;
-    localparam _MP_FALL_725643729 = 1'h0;
+    localparam _MP_RISE_986194382 = 1'h1;
+    localparam _MP_FALL_986194382 = 1'h0;
     logic M_player_2_green_button_edge_in;
     logic M_player_2_green_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_725643729),
-        .FALL(_MP_FALL_725643729)
+        .RISE(_MP_RISE_986194382),
+        .FALL(_MP_FALL_986194382)
     ) player_2_green_button_edge (
         .clk(clk),
         .in(M_player_2_green_button_edge_in),
@@ -180,14 +182,14 @@ module game_control_unit (
     );
     
     
-    localparam _MP_RISE_1703307036 = 1'h1;
-    localparam _MP_FALL_1703307036 = 1'h0;
+    localparam _MP_RISE_1909036051 = 1'h1;
+    localparam _MP_FALL_1909036051 = 1'h0;
     logic M_player_2_blue_button_edge_in;
     logic M_player_2_blue_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_1703307036),
-        .FALL(_MP_FALL_1703307036)
+        .RISE(_MP_RISE_1909036051),
+        .FALL(_MP_FALL_1909036051)
     ) player_2_blue_button_edge (
         .clk(clk),
         .in(M_player_2_blue_button_edge_in),
@@ -195,37 +197,37 @@ module game_control_unit (
     );
     
     
-    localparam logic [4:0][0:0] _MP_RISE_2081924005 = {{1'h1, 1'h1, 1'h1, 1'h1, 1'h1}};
-    localparam logic [4:0][0:0] _MP_FALL_2081924005 = {{1'h0, 1'h0, 1'h0, 1'h0, 1'h0}};
+    localparam logic [4:0][0:0] _MP_RISE_1944357320 = {{1'h1, 1'h1, 1'h1, 1'h1, 1'h1}};
+    localparam logic [4:0][0:0] _MP_FALL_1944357320 = {{1'h0, 1'h0, 1'h0, 1'h0, 1'h0}};
     logic [4:0] M_io_button_edge_in;
     logic [4:0] M_io_button_edge_out;
     
-    genvar idx_0_2081924005;
+    genvar idx_0_1944357320;
     
     generate
-        for (idx_0_2081924005 = 0; idx_0_2081924005 < 5; idx_0_2081924005 = idx_0_2081924005 + 1) begin: forLoop_idx_0_2081924005
+        for (idx_0_1944357320 = 0; idx_0_1944357320 < 5; idx_0_1944357320 = idx_0_1944357320 + 1) begin: forLoop_idx_0_1944357320
             edge_detector #(
-                .RISE(_MP_RISE_2081924005[idx_0_2081924005]),
-                .FALL(_MP_FALL_2081924005[idx_0_2081924005])
+                .RISE(_MP_RISE_1944357320[idx_0_1944357320]),
+                .FALL(_MP_FALL_1944357320[idx_0_1944357320])
             ) io_button_edge (
                 .clk(clk),
-                .in(M_io_button_edge_in[idx_0_2081924005]),
-                .out(M_io_button_edge_out[idx_0_2081924005])
+                .in(M_io_button_edge_in[idx_0_1944357320]),
+                .out(M_io_button_edge_out[idx_0_1944357320])
             );
         end
     endgenerate
     
     
-    localparam _MP_CLK_FREQ_1547596116 = 24'h989680;
-    localparam _MP_MIN_DELAY_1547596116 = 5'h14;
-    localparam _MP_NUM_SYNC_1547596116 = 2'h2;
+    localparam _MP_CLK_FREQ_1611829264 = 24'h989680;
+    localparam _MP_MIN_DELAY_1611829264 = 5'h14;
+    localparam _MP_NUM_SYNC_1611829264 = 2'h2;
     logic M_p1_red_or_start_btn_cond_in;
     logic M_p1_red_or_start_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_1547596116),
-        .MIN_DELAY(_MP_MIN_DELAY_1547596116),
-        .NUM_SYNC(_MP_NUM_SYNC_1547596116)
+        .CLK_FREQ(_MP_CLK_FREQ_1611829264),
+        .MIN_DELAY(_MP_MIN_DELAY_1611829264),
+        .NUM_SYNC(_MP_NUM_SYNC_1611829264)
     ) p1_red_or_start_btn_cond (
         .clk(clk),
         .in(M_p1_red_or_start_btn_cond_in),
@@ -233,16 +235,16 @@ module game_control_unit (
     );
     
     
-    localparam _MP_CLK_FREQ_848315735 = 24'h989680;
-    localparam _MP_MIN_DELAY_848315735 = 5'h14;
-    localparam _MP_NUM_SYNC_848315735 = 2'h2;
+    localparam _MP_CLK_FREQ_1673435227 = 24'h989680;
+    localparam _MP_MIN_DELAY_1673435227 = 5'h14;
+    localparam _MP_NUM_SYNC_1673435227 = 2'h2;
     logic M_p1_green_btn_cond_in;
     logic M_p1_green_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_848315735),
-        .MIN_DELAY(_MP_MIN_DELAY_848315735),
-        .NUM_SYNC(_MP_NUM_SYNC_848315735)
+        .CLK_FREQ(_MP_CLK_FREQ_1673435227),
+        .MIN_DELAY(_MP_MIN_DELAY_1673435227),
+        .NUM_SYNC(_MP_NUM_SYNC_1673435227)
     ) p1_green_btn_cond (
         .clk(clk),
         .in(M_p1_green_btn_cond_in),
@@ -250,16 +252,16 @@ module game_control_unit (
     );
     
     
-    localparam _MP_CLK_FREQ_490759346 = 24'h989680;
-    localparam _MP_MIN_DELAY_490759346 = 5'h14;
-    localparam _MP_NUM_SYNC_490759346 = 2'h2;
+    localparam _MP_CLK_FREQ_1658508422 = 24'h989680;
+    localparam _MP_MIN_DELAY_1658508422 = 5'h14;
+    localparam _MP_NUM_SYNC_1658508422 = 2'h2;
     logic M_p1_blue_btn_cond_in;
     logic M_p1_blue_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_490759346),
-        .MIN_DELAY(_MP_MIN_DELAY_490759346),
-        .NUM_SYNC(_MP_NUM_SYNC_490759346)
+        .CLK_FREQ(_MP_CLK_FREQ_1658508422),
+        .MIN_DELAY(_MP_MIN_DELAY_1658508422),
+        .NUM_SYNC(_MP_NUM_SYNC_1658508422)
     ) p1_blue_btn_cond (
         .clk(clk),
         .in(M_p1_blue_btn_cond_in),
@@ -267,16 +269,16 @@ module game_control_unit (
     );
     
     
-    localparam _MP_CLK_FREQ_772208305 = 24'h989680;
-    localparam _MP_MIN_DELAY_772208305 = 5'h14;
-    localparam _MP_NUM_SYNC_772208305 = 2'h2;
+    localparam _MP_CLK_FREQ_35128978 = 24'h989680;
+    localparam _MP_MIN_DELAY_35128978 = 5'h14;
+    localparam _MP_NUM_SYNC_35128978 = 2'h2;
     logic M_p2_red_btn_cond_in;
     logic M_p2_red_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_772208305),
-        .MIN_DELAY(_MP_MIN_DELAY_772208305),
-        .NUM_SYNC(_MP_NUM_SYNC_772208305)
+        .CLK_FREQ(_MP_CLK_FREQ_35128978),
+        .MIN_DELAY(_MP_MIN_DELAY_35128978),
+        .NUM_SYNC(_MP_NUM_SYNC_35128978)
     ) p2_red_btn_cond (
         .clk(clk),
         .in(M_p2_red_btn_cond_in),
@@ -284,16 +286,16 @@ module game_control_unit (
     );
     
     
-    localparam _MP_CLK_FREQ_1764536949 = 24'h989680;
-    localparam _MP_MIN_DELAY_1764536949 = 5'h14;
-    localparam _MP_NUM_SYNC_1764536949 = 2'h2;
+    localparam _MP_CLK_FREQ_582187127 = 24'h989680;
+    localparam _MP_MIN_DELAY_582187127 = 5'h14;
+    localparam _MP_NUM_SYNC_582187127 = 2'h2;
     logic M_p2_green_btn_cond_in;
     logic M_p2_green_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_1764536949),
-        .MIN_DELAY(_MP_MIN_DELAY_1764536949),
-        .NUM_SYNC(_MP_NUM_SYNC_1764536949)
+        .CLK_FREQ(_MP_CLK_FREQ_582187127),
+        .MIN_DELAY(_MP_MIN_DELAY_582187127),
+        .NUM_SYNC(_MP_NUM_SYNC_582187127)
     ) p2_green_btn_cond (
         .clk(clk),
         .in(M_p2_green_btn_cond_in),
@@ -301,16 +303,16 @@ module game_control_unit (
     );
     
     
-    localparam _MP_CLK_FREQ_1495722234 = 24'h989680;
-    localparam _MP_MIN_DELAY_1495722234 = 5'h14;
-    localparam _MP_NUM_SYNC_1495722234 = 2'h2;
+    localparam _MP_CLK_FREQ_903364666 = 24'h989680;
+    localparam _MP_MIN_DELAY_903364666 = 5'h14;
+    localparam _MP_NUM_SYNC_903364666 = 2'h2;
     logic M_p2_blue_btn_cond_in;
     logic M_p2_blue_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_1495722234),
-        .MIN_DELAY(_MP_MIN_DELAY_1495722234),
-        .NUM_SYNC(_MP_NUM_SYNC_1495722234)
+        .CLK_FREQ(_MP_CLK_FREQ_903364666),
+        .MIN_DELAY(_MP_MIN_DELAY_903364666),
+        .NUM_SYNC(_MP_NUM_SYNC_903364666)
     ) p2_blue_btn_cond (
         .clk(clk),
         .in(M_p2_blue_btn_cond_in),
@@ -318,24 +320,24 @@ module game_control_unit (
     );
     
     
-    localparam logic [4:0][23:0] _MP_CLK_FREQ_1380194573 = {{24'h989680, 24'h989680, 24'h989680, 24'h989680, 24'h989680}};
-    localparam _MP_MIN_DELAY_1380194573 = 5'h14;
-    localparam _MP_NUM_SYNC_1380194573 = 2'h2;
+    localparam logic [4:0][23:0] _MP_CLK_FREQ_2058735117 = {{24'h989680, 24'h989680, 24'h989680, 24'h989680, 24'h989680}};
+    localparam _MP_MIN_DELAY_2058735117 = 5'h14;
+    localparam _MP_NUM_SYNC_2058735117 = 2'h2;
     logic [4:0] M_io_button_cond_in;
     logic [4:0] M_io_button_cond_out;
     
-    genvar idx_0_1380194573;
+    genvar idx_0_2058735117;
     
     generate
-        for (idx_0_1380194573 = 0; idx_0_1380194573 < 5; idx_0_1380194573 = idx_0_1380194573 + 1) begin: forLoop_idx_0_1380194573
+        for (idx_0_2058735117 = 0; idx_0_2058735117 < 5; idx_0_2058735117 = idx_0_2058735117 + 1) begin: forLoop_idx_0_2058735117
             button_conditioner #(
-                .CLK_FREQ(_MP_CLK_FREQ_1380194573[idx_0_1380194573]),
-                .MIN_DELAY(_MP_MIN_DELAY_1380194573),
-                .NUM_SYNC(_MP_NUM_SYNC_1380194573)
+                .CLK_FREQ(_MP_CLK_FREQ_2058735117[idx_0_2058735117]),
+                .MIN_DELAY(_MP_MIN_DELAY_2058735117),
+                .NUM_SYNC(_MP_NUM_SYNC_2058735117)
             ) io_button_cond (
                 .clk(clk),
-                .in(M_io_button_cond_in[idx_0_1380194573]),
-                .out(M_io_button_cond_out[idx_0_1380194573])
+                .in(M_io_button_cond_in[idx_0_2058735117]),
+                .out(M_io_button_cond_out[idx_0_2058735117])
             );
         end
     endgenerate
@@ -349,6 +351,7 @@ module game_control_unit (
         D_is_player_2_correct_d = D_is_player_2_correct_q;
         D_p1_current_lives_d = D_p1_current_lives_q;
         D_p2_current_lives_d = D_p2_current_lives_q;
+        D_arcade_buttons_d = D_arcade_buttons_q;
         D_game_state_d = D_game_state_q;
         
         p1_current_lives_out = 1'h0;
@@ -363,6 +366,7 @@ module game_control_unit (
         led = 8'h0;
         colour_choice = current_colour_choice;
         debug_current_colour_choice = 1'h0;
+        arcade_buttons_light_up = 1'h0;
         D_current_state_number_d = D_current_state_number_q;
         D_current_colour_d = D_current_colour_q;
         D_player_button_input_d = D_player_button_input_q;
@@ -370,6 +374,7 @@ module game_control_unit (
         D_is_player_2_correct_d = D_is_player_2_correct_q;
         D_p1_current_lives_d = D_p1_current_lives_q;
         D_p2_current_lives_d = D_p2_current_lives_q;
+        D_arcade_buttons_d = D_arcade_buttons_q;
         alufn = 1'h0;
         asel = 1'h0;
         bsel = 1'h0;
@@ -400,22 +405,26 @@ module game_control_unit (
             
             case (D_game_state_q)
                 5'h0: begin
-                    regfile_ra2 = 4'h1;
-                    D_p2_current_lives_d = regfile_rd2[2'h2:1'h0];
                     D_current_state_number_d = 1'h0;
-                    regfile_we = 1'h0;
                     if (M_io_button_edge_out[3'h4]) begin
                         D_game_state_d = 5'h1;
                     end
                 end
                 5'h1: begin
-                    regfile_ra2 = 4'h0;
-                    D_p1_current_lives_d = regfile_rd2[1'h1:1'h0];
-                    D_current_state_number_d = 1'h1;
+                    regfile_ra2 = 4'h1;
+                    D_p2_current_lives_d = regfile_rd2[2'h2:1'h0];
+                    D_current_state_number_d = 1'h0;
                     regfile_we = 1'h0;
                     D_game_state_d = 5'h2;
                 end
                 5'h2: begin
+                    regfile_ra2 = 4'h0;
+                    D_p1_current_lives_d = regfile_rd2[2'h2:1'h0];
+                    D_current_state_number_d = 1'h1;
+                    regfile_we = 1'h0;
+                    D_game_state_d = 5'h3;
+                end
+                5'h3: begin
                     D_current_state_number_d = 2'h2;
                     regfile_wa = 4'h2;
                     alufn = 1'h0;
@@ -425,17 +434,10 @@ module game_control_unit (
                     regfile_ra1 = 1'h0;
                     if (M_io_button_edge_out[3'h4]) begin
                         regfile_we = 1'h1;
-                        D_game_state_d = 5'h3;
+                        D_game_state_d = 5'h4;
                     end
                 end
-                5'h16: begin
-                    D_current_state_number_d = 2'h3;
-                    regfile_we = 1'h0;
-                    regfile_wa = 1'h0;
-                    regfile_ra2 = 4'h2;
-                    D_current_colour_d = regfile_rd2[1'h1:1'h0];
-                end
-                5'h3: begin
+                5'h4: begin
                     led[2'h3] = 1'h1;
                     D_current_state_number_d = 2'h3;
                     regfile_ra2 = 4'h2;
@@ -443,10 +445,10 @@ module game_control_unit (
                     if (M_io_button_edge_out[3'h4]) begin
                         regfile_ra2 = 4'h2;
                         D_current_colour_d = current_colour_choice;
-                        D_game_state_d = 5'h4;
+                        D_game_state_d = 5'h5;
                     end
                 end
-                5'h4: begin
+                5'h5: begin
                     D_current_state_number_d = 3'h4;
                     regfile_ra2 = 4'h2;
                     debug = regfile_rd2[3'h7:1'h0];
@@ -460,7 +462,7 @@ module game_control_unit (
                         alufn = 6'h1a;
                         wd_sel = 1'h0;
                         D_player_button_input_d = 3'h1;
-                        D_game_state_d = 5'h5;
+                        D_game_state_d = 5'h6;
                     end else begin
                         if (M_player_1_green_button_edge_out) begin
                             regfile_we = 1'h1;
@@ -472,7 +474,7 @@ module game_control_unit (
                             alufn = 6'h1a;
                             wd_sel = 1'h0;
                             D_player_button_input_d = 3'h2;
-                            D_game_state_d = 5'h5;
+                            D_game_state_d = 5'h6;
                         end else begin
                             if (M_player_1_blue_button_edge_out) begin
                                 regfile_we = 1'h1;
@@ -484,7 +486,7 @@ module game_control_unit (
                                 alufn = 6'h1a;
                                 wd_sel = 1'h0;
                                 D_player_button_input_d = 3'h3;
-                                D_game_state_d = 5'h5;
+                                D_game_state_d = 5'h6;
                             end else begin
                                 if (M_player_2_red_button_edge_out) begin
                                     regfile_we = 1'h1;
@@ -496,7 +498,7 @@ module game_control_unit (
                                     alufn = 6'h1a;
                                     wd_sel = 1'h0;
                                     D_player_button_input_d = 3'h4;
-                                    D_game_state_d = 5'h6;
+                                    D_game_state_d = 5'h7;
                                 end else begin
                                     if (M_player_2_green_button_edge_out) begin
                                         regfile_we = 1'h1;
@@ -508,7 +510,7 @@ module game_control_unit (
                                         alufn = 6'h1a;
                                         wd_sel = 1'h0;
                                         D_player_button_input_d = 3'h5;
-                                        D_game_state_d = 5'h6;
+                                        D_game_state_d = 5'h7;
                                     end else begin
                                         if (M_player_2_blue_button_edge_out) begin
                                             regfile_we = 1'h1;
@@ -520,7 +522,7 @@ module game_control_unit (
                                             alufn = 6'h1a;
                                             wd_sel = 1'h0;
                                             D_player_button_input_d = 3'h6;
-                                            D_game_state_d = 5'h6;
+                                            D_game_state_d = 5'h7;
                                         end
                                     end
                                 end
@@ -528,7 +530,7 @@ module game_control_unit (
                         end
                     end
                 end
-                5'h5: begin
+                5'h6: begin
                     D_current_state_number_d = 3'h5;
                     regfile_we = 1'h1;
                     regfile_wa = 4'h5;
@@ -538,9 +540,9 @@ module game_control_unit (
                     bsel = 2'h0;
                     alufn = 6'h33;
                     wd_sel = 1'h0;
-                    D_game_state_d = 5'h7;
+                    D_game_state_d = 5'h8;
                 end
-                5'h6: begin
+                5'h7: begin
                     D_current_state_number_d = 3'h5;
                     regfile_we = 1'h1;
                     regfile_wa = 4'h6;
@@ -550,51 +552,37 @@ module game_control_unit (
                     bsel = 2'h0;
                     alufn = 6'h33;
                     wd_sel = 1'h0;
-                    D_game_state_d = 5'h8;
+                    D_game_state_d = 5'h9;
                 end
-                5'h7: begin
+                5'h8: begin
                     D_current_state_number_d = 3'h6;
                     regfile_we = 1'h0;
                     regfile_ra2 = 4'h5;
                     D_is_player_1_correct_d = regfile_rd2[1'h0];
                     if (regfile_rd2[1'h0]) begin
                         if (M_io_button_edge_out[3'h4]) begin
-                            D_game_state_d = 5'h9;
+                            D_game_state_d = 5'ha;
                         end
                     end else begin
-                        D_game_state_d = 5'h2;
+                        D_game_state_d = 5'h3;
                     end
                 end
-                5'h8: begin
+                5'h9: begin
                     D_current_state_number_d = 3'h6;
                     regfile_we = 1'h0;
                     regfile_ra2 = 4'h6;
                     D_is_player_2_correct_d = regfile_rd2[1'h0];
                     if (regfile_rd2[1'h0]) begin
                         if (M_io_button_edge_out[3'h4]) begin
-                            D_game_state_d = 5'ha;
+                            D_game_state_d = 5'hb;
                         end
                     end else begin
-                        D_game_state_d = 5'h2;
-                    end
-                end
-                5'h9: begin
-                    D_current_state_number_d = 3'h7;
-                    regfile_wa = 4'h5;
-                    regfile_ra1 = 1'h0;
-                    regfile_ra2 = 1'h0;
-                    asel = 2'h1;
-                    bsel = 2'h0;
-                    alufn = 6'h1a;
-                    wd_sel = 1'h0;
-                    if (M_io_button_edge_out[3'h4]) begin
-                        regfile_we = 1'h1;
-                        D_game_state_d = 5'hb;
+                        D_game_state_d = 5'h3;
                     end
                 end
                 5'ha: begin
                     D_current_state_number_d = 3'h7;
-                    regfile_wa = 4'h6;
+                    regfile_wa = 4'h5;
                     regfile_ra1 = 1'h0;
                     regfile_ra2 = 1'h0;
                     asel = 2'h1;
@@ -607,41 +595,41 @@ module game_control_unit (
                     end
                 end
                 5'hb: begin
-                    D_current_state_number_d = 4'h8;
-                    regfile_we = 1'h0;
-                    regfile_ra2 = 4'h5;
-                    D_is_player_1_correct_d = regfile_rd2[1'h0];
+                    D_current_state_number_d = 3'h7;
+                    regfile_wa = 4'h6;
+                    regfile_ra1 = 1'h0;
+                    regfile_ra2 = 1'h0;
+                    asel = 2'h1;
+                    bsel = 2'h0;
+                    alufn = 6'h1a;
+                    wd_sel = 1'h0;
                     if (M_io_button_edge_out[3'h4]) begin
+                        regfile_we = 1'h1;
                         D_game_state_d = 5'hd;
                     end
                 end
                 5'hc: begin
                     D_current_state_number_d = 4'h8;
                     regfile_we = 1'h0;
-                    regfile_ra2 = 4'h6;
-                    D_is_player_2_correct_d = regfile_rd2[1'h0];
+                    regfile_ra2 = 4'h5;
+                    D_is_player_1_correct_d = regfile_rd2[1'h0];
                     if (M_io_button_edge_out[3'h4]) begin
                         D_game_state_d = 5'he;
                     end
                 end
                 5'hd: begin
-                    D_current_state_number_d = 4'h9;
-                    regfile_wa = 4'h1;
-                    regfile_ra1 = 4'h1;
-                    regfile_ra2 = 1'h0;
-                    asel = 2'h0;
-                    bsel = 2'h1;
-                    alufn = 6'h1;
-                    wd_sel = 1'h0;
+                    D_current_state_number_d = 4'h8;
+                    regfile_we = 1'h0;
+                    regfile_ra2 = 4'h6;
+                    D_is_player_2_correct_d = regfile_rd2[1'h0];
                     if (M_io_button_edge_out[3'h4]) begin
-                        regfile_we = 1'h1;
                         D_game_state_d = 5'hf;
                     end
                 end
                 5'he: begin
                     D_current_state_number_d = 4'h9;
-                    regfile_wa = 4'h0;
-                    regfile_ra1 = 4'h0;
+                    regfile_wa = 4'h1;
+                    regfile_ra1 = 4'h1;
                     regfile_ra2 = 1'h0;
                     asel = 2'h0;
                     bsel = 2'h1;
@@ -653,41 +641,41 @@ module game_control_unit (
                     end
                 end
                 5'hf: begin
-                    D_current_state_number_d = 4'ha;
-                    regfile_we = 1'h0;
-                    regfile_ra2 = 4'h1;
-                    D_p2_current_lives_d = regfile_rd2[2'h2:1'h0];
+                    D_current_state_number_d = 4'h9;
+                    regfile_wa = 4'h0;
+                    regfile_ra1 = 4'h0;
+                    regfile_ra2 = 1'h0;
+                    asel = 2'h0;
+                    bsel = 2'h1;
+                    alufn = 6'h1;
+                    wd_sel = 1'h0;
                     if (M_io_button_edge_out[3'h4]) begin
+                        regfile_we = 1'h1;
                         D_game_state_d = 5'h11;
                     end
                 end
                 5'h10: begin
                     D_current_state_number_d = 4'ha;
                     regfile_we = 1'h0;
-                    regfile_ra2 = 4'h0;
-                    D_p1_current_lives_d = regfile_rd2[2'h2:1'h0];
+                    regfile_ra2 = 4'h1;
+                    D_p2_current_lives_d = regfile_rd2[2'h2:1'h0];
                     if (M_io_button_edge_out[3'h4]) begin
                         D_game_state_d = 5'h12;
                     end
                 end
                 5'h11: begin
-                    D_current_state_number_d = 4'hb;
-                    regfile_wa = 4'h8;
-                    regfile_ra1 = 4'h1;
-                    regfile_ra2 = 1'h0;
-                    asel = 2'h0;
-                    bsel = 2'h1;
-                    alufn = 6'h35;
-                    wd_sel = 1'h0;
+                    D_current_state_number_d = 4'ha;
+                    regfile_we = 1'h0;
+                    regfile_ra2 = 4'h0;
+                    D_p1_current_lives_d = regfile_rd2[2'h2:1'h0];
                     if (M_io_button_edge_out[3'h4]) begin
-                        regfile_we = 1'h1;
                         D_game_state_d = 5'h13;
                     end
                 end
                 5'h12: begin
                     D_current_state_number_d = 4'hb;
-                    regfile_wa = 4'h7;
-                    regfile_ra1 = 4'h0;
+                    regfile_wa = 4'h8;
+                    regfile_ra1 = 4'h1;
                     regfile_ra2 = 1'h0;
                     asel = 2'h0;
                     bsel = 2'h1;
@@ -699,31 +687,46 @@ module game_control_unit (
                     end
                 end
                 5'h13: begin
-                    D_current_state_number_d = 4'hc;
-                    regfile_we = 1'h0;
-                    regfile_ra2 = 4'h8;
-                    if (regfile_rd2[1'h0]) begin
-                        if (M_io_button_edge_out[3'h4]) begin
-                            D_game_state_d = 5'h15;
-                        end
-                    end else begin
-                        D_game_state_d = 5'h2;
+                    D_current_state_number_d = 4'hb;
+                    regfile_wa = 4'h7;
+                    regfile_ra1 = 4'h0;
+                    regfile_ra2 = 1'h0;
+                    asel = 2'h0;
+                    bsel = 2'h1;
+                    alufn = 6'h35;
+                    wd_sel = 1'h0;
+                    if (M_io_button_edge_out[3'h4]) begin
+                        regfile_we = 1'h1;
+                        D_game_state_d = 5'h15;
                     end
                 end
                 5'h14: begin
                     D_current_state_number_d = 4'hc;
                     regfile_we = 1'h0;
-                    regfile_ra2 = 4'h7;
+                    regfile_ra2 = 4'h8;
                     if (regfile_rd2[1'h0]) begin
                         if (M_io_button_edge_out[3'h4]) begin
-                            D_game_state_d = 5'h15;
+                            D_game_state_d = 5'h16;
                         end
                     end else begin
-                        D_game_state_d = 5'h2;
+                        D_game_state_d = 5'h3;
                     end
                 end
                 5'h15: begin
+                    D_current_state_number_d = 4'hc;
+                    regfile_we = 1'h0;
+                    regfile_ra2 = 4'h7;
+                    if (regfile_rd2[1'h0]) begin
+                        if (M_io_button_edge_out[3'h4]) begin
+                            D_game_state_d = 5'h16;
+                        end
+                    end else begin
+                        D_game_state_d = 5'h3;
+                    end
+                end
+                5'h16: begin
                     D_current_state_number_d = 4'hd;
+                    D_arcade_buttons_d = 1'h1;
                     D_current_colour_d = 2'h3;
                 end
             endcase
@@ -742,6 +745,7 @@ module game_control_unit (
             debug_player_button_input = D_player_button_input_q;
             debug_current_colour_choice = colour_choice;
             game_colour_led_value = D_current_colour_q;
+            arcade_buttons_light_up = D_arcade_buttons_q;
         end
     end
     
@@ -756,6 +760,7 @@ module game_control_unit (
             D_p2_current_lives_q <= 0;
             D_current_colour_q <= 2'h3;
             D_game_state_q <= 5'h0;
+            D_arcade_buttons_q <= 1'h0;
         end else begin
             D_player_button_input_q <= D_player_button_input_d;
             D_current_state_number_q <= D_current_state_number_d;
@@ -765,6 +770,7 @@ module game_control_unit (
             D_p2_current_lives_q <= D_p2_current_lives_d;
             D_current_colour_q <= D_current_colour_d;
             D_game_state_q <= D_game_state_d;
+            D_arcade_buttons_q <= D_arcade_buttons_d;
         end
     end
 endmodule

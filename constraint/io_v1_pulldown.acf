@@ -26,45 +26,53 @@ PINOUT(V1), STANDARD(LVCMOS33) {
 
     PULL(DOWN) {
         //pin io_dip[0][0] B30
-        pin io_dip[0][1] B31
+        //pin io_dip[0][1] B31  // doesnt work
         //pin io_dip[0][2] B33
-        pin io_dip[0][3] B34
-        pin io_dip[0][4] B36
-        pin io_dip[0][5] B37
-        pin io_dip[0][6] B39
-        pin io_dip[0][7] B40
-        pin io_dip[1][0] B42
-        pin io_dip[1][1] B43
-        pin io_dip[1][2] B45
-        pin io_dip[1][3] B46
-        pin io_dip[1][4] B48
-        pin io_dip[1][5] B49
-        pin io_dip[1][6] A27
+        pin io_dip[0][3] B34  // doesnt work
+        pin io_dip[0][4] B36  // doesnt work
+        pin io_dip[0][5] B37  // doesnt work
+        
+        //pin io_dip[0][6] B39
+        //pin io_dip[0][7] B40
+        //pin io_dip[1][0] B42
+        //pin io_dip[1][1] B43
+        //pin io_dip[1][2] B45
+        //pin io_dip[1][3] B46
+        //pin io_dip[1][4] B48
+        //pin io_dip[1][5] B49
+        //pin io_dip[1][6] A27
         pin io_dip[1][7] A28
         pin io_dip[2][0] A30
         pin io_dip[2][1] A31
         pin io_dip[2][2] A33
-        pin io_dip[2][3] A34
+        
+        
+        pin io_dip[2][3] A34  
         //pin io_dip[2][4] A36
-        //pin io_dip[2][5] A37
-        pin io_dip[2][6] A39
-        //pin io_dip[2][7] A40
+        pin io_dip[2][5] A37  
+        pin io_dip[2][6] A39  
+        pin io_dip[2][7] A40  
 
         //pin io_button[0] B28
         pin io_button[1] B27
-        pin io_button[2] B23
+        //pin io_button[2] B23
         pin io_button[3] B24
-        pin io_button[4] C49
+        pin io_button[4] C49  // START BUTTON
         
-        pin player_1_red_or_start_button C2
+        
+        
+        pin player_1_red_or_start_button C2  // player 1 buttons 
         pin player_1_green_button C45
         pin player_1_blue_button C6
         
         
-        
-        pin player_2_red_button B30
+        pin player_2_red_button B30   // player 2 buttons
         pin player_2_green_button C39
         pin player_2_blue_button B33
+    }
+  
+    PULL(UP){
+        pin game_reset B23
     }
     
     pin io_select[0] A9
@@ -82,10 +90,21 @@ PINOUT(V1), STANDARD(LVCMOS33) {
     pin io_segment[7] A49
     
 
-    pin data C40
+    pin data C40 // for showing current ccolour
     
-    pin show_red A37   // for showing current colour
-    pin show_green A36
-    pin show_blue A40
+    // SWAPPED PINS FOR PLAYER 1 AND PLAYER 2 TO SEE IF ITS CODE ISSUE
+    pin player_1_life_1 A36  // for showing player 1 lives
+    pin player_1_life_2 B46  // only pin 36 works, rest not yet tested
+    pin player_1_life_3 B48
+    pin player_1_life_4 B49
+    pin player_1_life_5 A27   // top life on enclosure
+    
+    pin player_2_life_1 B39 // for showing player 2 lives
+    pin player_2_life_2 B40 // all works   
+    pin player_2_life_3 B43
+    pin player_2_life_4 B42
+    pin player_2_life_5 B45   // top life on enclosure
+    
+    pin arcade_buttons_light B31
     
 }
