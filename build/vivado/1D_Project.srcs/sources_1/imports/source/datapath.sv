@@ -15,7 +15,6 @@ module datapath (
         input wire player_2_blue_button,
         input wire [4:0] io_button,
         output reg [1:0] debuggerino,
-        output reg [1:0] intermediate_debug,
         output reg ws2812b_data,
         output reg [7:0] current_state,
         output reg [2:0] player_button_input,
@@ -27,15 +26,14 @@ module datapath (
     );
     logic [31:0] input_alu_a;
     logic [31:0] input_alu_b;
-    logic [1:0] intermediate_debuggerino;
-    localparam _MP_SEED_760441106 = 30'h286b4b9c;
-    localparam _MP_FAST_CLOCK_DIV_760441106 = 4'hc;
+    localparam _MP_SEED_511468521 = 30'h286b4b9c;
+    localparam _MP_FAST_CLOCK_DIV_511468521 = 4'hc;
     logic M_rngesus_out;
     logic [15:0] M_rngesus_debug;
     
     variable_timer #(
-        .SEED(_MP_SEED_760441106),
-        .FAST_CLOCK_DIV(_MP_FAST_CLOCK_DIV_760441106)
+        .SEED(_MP_SEED_511468521),
+        .FAST_CLOCK_DIV(_MP_FAST_CLOCK_DIV_511468521)
     ) rngesus (
         .clk(clk),
         .rst(rst),
@@ -206,8 +204,6 @@ module datapath (
             end
         endcase
         debuggerino = M_regfile_current_colour_out[1'h1:1'h0];
-        intermediate_debuggerino = M_gameStates_debug_current_colour_choice;
-        intermediate_debug = intermediate_debuggerino;
         M_gameStates_current_colour_choice = M_regfile_current_colour_out[1'h1:1'h0];
         ws2812b_data = M_gameStates_data;
         current_state = M_gameStates_current_game_state_number;

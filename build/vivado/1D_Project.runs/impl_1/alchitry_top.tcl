@@ -17,7 +17,7 @@ proc create_report { reportName command } {
   }
 }
 namespace eval ::optrace {
-  variable script "C:/alchitry__/1D_Project/build/vivado/1D_Project.runs/impl_1/alchitry_top.tcl"
+  variable script "C:/alchitry__/1D_Project_latest/build/vivado/1D_Project.runs/impl_1/alchitry_top.tcl"
   variable category "vivado_impl"
 }
 
@@ -130,16 +130,16 @@ OPTRACE "create in-memory project" START { }
   set_param project.singleFileAddWarning.threshold 0
 OPTRACE "create in-memory project" END { }
 OPTRACE "set parameters" START { }
-  set_property webtalk.parent_dir C:/alchitry__/1D_Project/build/vivado/1D_Project.cache/wt [current_project]
-  set_property parent.project_path C:/alchitry__/1D_Project/build/vivado/1D_Project.xpr [current_project]
-  set_property ip_output_repo C:/alchitry__/1D_Project/build/vivado/1D_Project.cache/ip [current_project]
+  set_property webtalk.parent_dir C:/alchitry__/1D_Project_latest/build/vivado/1D_Project.cache/wt [current_project]
+  set_property parent.project_path C:/alchitry__/1D_Project_latest/build/vivado/1D_Project.xpr [current_project]
+  set_property ip_output_repo C:/alchitry__/1D_Project_latest/build/vivado/1D_Project.cache/ip [current_project]
   set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "set parameters" END { }
 OPTRACE "add files" START { }
-  add_files -quiet C:/alchitry__/1D_Project/build/vivado/1D_Project.runs/synth_1/alchitry_top.dcp
+  add_files -quiet C:/alchitry__/1D_Project_latest/build/vivado/1D_Project.runs/synth_1/alchitry_top.dcp
 OPTRACE "read constraints: implementation" START { }
-  read_xdc C:/alchitry__/1D_Project/build/constraint/alchitry.xdc
-  read_xdc C:/alchitry__/1D_Project/build/constraint/au_props.xdc
+  read_xdc C:/alchitry__/1D_Project_latest/build/constraint/alchitry.xdc
+  read_xdc C:/alchitry__/1D_Project_latest/build/constraint/au_props.xdc
 OPTRACE "read constraints: implementation" END { }
 OPTRACE "read constraints: implementation_pre" START { }
 OPTRACE "read constraints: implementation_pre" END { }

@@ -26,11 +26,11 @@ PINOUT(V1), STANDARD(LVCMOS33) {
 
     PULL(DOWN) {
         //pin io_dip[0][0] B30
-        //pin io_dip[0][1] B31  // doesnt work
+        //pin io_dip[0][1] B31  
         //pin io_dip[0][2] B33
-        pin io_dip[0][3] B34  // doesnt work
-        pin io_dip[0][4] B36  // doesnt work
-        pin io_dip[0][5] B37  // doesnt work
+        pin io_dip[0][3] B34  
+        pin io_dip[0][4] B36  
+        pin io_dip[0][5] B37  
         
         //pin io_dip[0][6] B39
         //pin io_dip[0][7] B40
@@ -61,18 +61,18 @@ PINOUT(V1), STANDARD(LVCMOS33) {
         
         
         
-        pin player_1_red_or_start_button C2  // player 1 buttons 
-        pin player_1_green_button C45
-        pin player_1_blue_button C6
+        pin player_1_red_or_start_button B30 // player 1 buttons 
+        pin player_1_green_button C39
+        pin player_1_blue_button B33
         
         
-        pin player_2_red_button B30   // player 2 buttons
-        pin player_2_green_button C39
-        pin player_2_blue_button B33
+        pin player_2_red_button C2   // player 2 buttons
+        pin player_2_green_button C45
+        pin player_2_blue_button C6
     }
   
     PULL(UP){
-        pin game_reset B23
+        pin game_reset B23   // external reset button on enclosure
     }
     
     pin io_select[0] A9
@@ -90,20 +90,19 @@ PINOUT(V1), STANDARD(LVCMOS33) {
     pin io_segment[7] A49
     
 
-    pin data C40 // for showing current ccolour
+    pin data C40 // for showing current colour on ws2812b
     
-    // SWAPPED PINS FOR PLAYER 1 AND PLAYER 2 TO SEE IF ITS CODE ISSUE
     pin player_1_life_1 A36  // for showing player 1 lives
-    pin player_1_life_2 B46  // only pin 36 works, rest not yet tested
+    pin player_1_life_2 B46  
     pin player_1_life_3 B48
     pin player_1_life_4 B49
-    pin player_1_life_5 A27   // top life on enclosure
+    pin player_1_life_5 A27  // top life led on enclosure
     
     pin player_2_life_1 B39 // for showing player 2 lives
-    pin player_2_life_2 B40 // all works   
+    pin player_2_life_2 B40   
     pin player_2_life_3 B43
     pin player_2_life_4 B42
-    pin player_2_life_5 B45   // top life on enclosure
+    pin player_2_life_5 B45 // top life led on enclosure
     
     pin arcade_buttons_light B31
     

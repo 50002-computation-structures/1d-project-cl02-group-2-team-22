@@ -165,27 +165,27 @@ set_property PACKAGE_PIN P11 [get_ports {io_button[4]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {io_button[4]}]
 set_property PULLDOWN true [get_ports {io_button[4]}]
 
-set_property PACKAGE_PIN T13 [get_ports {player_1_red_or_start_button}]
+set_property PACKAGE_PIN D6 [get_ports {player_1_red_or_start_button}]
 set_property IOSTANDARD LVCMOS33 [get_ports {player_1_red_or_start_button}]
 set_property PULLDOWN true [get_ports {player_1_red_or_start_button}]
 
-set_property PACKAGE_PIN N11 [get_ports {player_1_green_button}]
+set_property PACKAGE_PIN M2 [get_ports {player_1_green_button}]
 set_property IOSTANDARD LVCMOS33 [get_ports {player_1_green_button}]
 set_property PULLDOWN true [get_ports {player_1_green_button}]
 
-set_property PACKAGE_PIN R12 [get_ports {player_1_blue_button}]
+set_property PACKAGE_PIN F5 [get_ports {player_1_blue_button}]
 set_property IOSTANDARD LVCMOS33 [get_ports {player_1_blue_button}]
 set_property PULLDOWN true [get_ports {player_1_blue_button}]
 
-set_property PACKAGE_PIN D6 [get_ports {player_2_red_button}]
+set_property PACKAGE_PIN T13 [get_ports {player_2_red_button}]
 set_property IOSTANDARD LVCMOS33 [get_ports {player_2_red_button}]
 set_property PULLDOWN true [get_ports {player_2_red_button}]
 
-set_property PACKAGE_PIN M2 [get_ports {player_2_green_button}]
+set_property PACKAGE_PIN N11 [get_ports {player_2_green_button}]
 set_property IOSTANDARD LVCMOS33 [get_ports {player_2_green_button}]
 set_property PULLDOWN true [get_ports {player_2_green_button}]
 
-set_property PACKAGE_PIN F5 [get_ports {player_2_blue_button}]
+set_property PACKAGE_PIN R12 [get_ports {player_2_blue_button}]
 set_property IOSTANDARD LVCMOS33 [get_ports {player_2_blue_button}]
 set_property PULLDOWN true [get_ports {player_2_blue_button}]
 

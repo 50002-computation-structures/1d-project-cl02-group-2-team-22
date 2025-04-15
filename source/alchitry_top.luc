@@ -86,7 +86,7 @@ module alchitry_top (
         
         
         
-        data = 0  // data to disaply on ws2812b strip
+        data = 0  // drive data output to display on ws2812b strip
         io_segment = 0  // individual 7 seg LED will light up based on bit 1 or 0
         io_select = 4h0 // F means the selected 7 seg is off
         io_led = 3x{{8b0}}
@@ -103,16 +103,17 @@ module alchitry_top (
             io_led[1][2] = player_2_blue_button
         
         
-            // dispaly what is in register 2, which stores current_colour
+        
+        // CODE BELOW IS FOR DEBUGGING PURPOSES, NOT USED IN ACTUAL GAME
+            // display what is in register 2, which stores current_colour
             //io_led[1][4:3] = game_datapath.debuggerino
             //io_led[1][7:5] = game_datapath.player_button_input
-        
         
             //io_led[1][3] = game_datapath.is_player_1_correct
             //io_led[1][7:5] = game_datapath.current_p2_lives
             
-            io_led[1][3] = game_datapath.is_player_2_correct
-            io_led[1][7:5] = game_datapath.current_p1_lives
+            //io_led[1][3] = game_datapath.is_player_2_correct
+            //io_led[1][7:5] = game_datapath.current_p1_lives
         
             
               

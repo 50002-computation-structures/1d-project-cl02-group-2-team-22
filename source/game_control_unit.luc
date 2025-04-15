@@ -65,7 +65,7 @@ module game_control_unit (
         BRANCH_P1_ALIVE,
         
         
-        
+        RESET_COLOUR,  // To reset colour back to nothing after a round has ended for better playing experience
         GAME_OVER
         
                 
@@ -76,8 +76,6 @@ module game_control_unit (
     const PIXEL_COUNT = 10d30 // how many LEDs in total? 
         
     sig colour_choice[2]
-    
-    
     
     
     static_mode colour_display(.clk(clk), .rst(rst),.io_button(io_button), .colour_choice(current_colour_choice),
@@ -96,10 +94,9 @@ module game_control_unit (
     dff p1_current_lives[3](.clk(clk), .rst(rst))  // for testing whether P2_CORRECT_MINUS_P1_LIVES state is working
     dff p2_current_lives[3](.clk(clk), .rst(rst))  // for testing whether P1_CORRECT_MINUS_P2_LIVES state is working
     
-    dff current_colour[2](#INIT(3),.clk(clk), .rst(rst))   // to hold the current colour value
+    
     dff game_state[$width(GameStates)](#INIT(GameStates.IDLE), .clk(clk), .rst(rst))  // register to store current state of game
     
-    dff arcade_buttons(#INIT(0),. clk(clk), .rst(rst))  // to decide if the arcade buttons light up or not
     
     .clk(clk){
         // Use this to check if button has been pressed
@@ -147,13 +144,13 @@ module game_control_unit (
         
         // drive dffs
         current_state_number.d = current_state_number.q
-        current_colour.d = current_colour.q
+  
         player_button_input.d = player_button_input.q 
         is_player_1_correct.d = is_player_1_correct.q
         is_player_2_correct.d = is_player_2_correct.q
         p1_current_lives.d = p1_current_lives.q
         p2_current_lives.d = p2_current_lives.q
-        arcade_buttons.d = arcade_buttons.q
+        
         
         // standard setting unless overriden by each case
         alufn = 0
@@ -204,20 +201,16 @@ module game_control_unit (
                     } 
                     
                 
-                GameStates.START1:
-                    //led[0] = 1
+                GameStates.START1:  // initialise player 2's lives led display
                     regfile_ra2 = 4h1   // read from register 1, which has p2 lives
                     p2_current_lives.d = regfile_rd2[2:0]  // should be set to whatever regfile register 1 is intialised to 
                     current_state_number.d = 0
-                    regfile_we = 0
-                    //io_led[0][1] = player_1_red_or_start_button_edge.out
-                    //io_led[1][1] = io_button_edge.out[4]
+                    regfile_we = 0 // we are NOT writing
                     //if (player_2_red_button_edge.out | io_button_edge.out[4]){
                     game_state.d = GameStates.START2
                     //} 
                 
-                GameStates.START2:
-                    //led[1] = 1
+                GameStates.START2:  // initialise player 1's lives led display
                     regfile_ra2 = 4h0 // read from register 0, which has p1 lives
                     p1_current_lives.d = regfile_rd2[2:0] // should be set to whatever regfile register 0 is intialised to 
                     current_state_number.d = 1
@@ -225,49 +218,21 @@ module game_control_unit (
                     game_state.d = GameStates.STORE_RNG_COLOUR
 
                 GameStates.STORE_RNG_COLOUR:
-                    //led[2] = 1
                     current_state_number.d = 2
-                    //regfile_we = 1
                     regfile_wa = b0010  // write into register current_colour
                     alufn = 0  // doesnt matter as we are using wdsel = 1
                     asel = 0   // doesnt matter
                     bsel = 0   // doesnt matter
                     wd_sel = b1
                     regfile_ra1 = 0  // doesnt matter
-                    
-                    
-                    if (io_button_edge.out[4] ){
-                        regfile_we = 1
-                        game_state.d = GameStates.SHOW_COLOUR
-                    }
-                
-                
-                GameStates.SHOW_COLOUR:
-                    led[3] = 1
-                    current_state_number.d = 3
-                    regfile_ra2 = b0010  // doesnt matter
-                    
-                    debug = regfile_rd2[7:0]  // attach to led to see whats the content
-                    
-                    //colour_choice = regfile_rd2[1:0]
-                
-                    //current_colour.d = regfile_rd2[1:0]
-                    //led = 3
-                    //io_led[2][7:6] = current_colour.q
-                    if (io_button_edge.out[4] ){  
-                        regfile_ra2 = b0010  // reading from register current_colour to display colour
-                        //game_colour_led_value = regfile_rd2[1:0]
-                        
-                     
-                        current_colour.d = current_colour_choice
-                    
-                        game_state.d = GameStates.WAIT_FOR_PLAYER_INPUT
-                    }                
-         
 
+                    //if (io_button_edge.out[4] ){
+                    regfile_we = 1
+                    game_state.d = GameStates.WAIT_FOR_PLAYER_INPUT
+                    //}
                 
+                    
                 GameStates.WAIT_FOR_PLAYER_INPUT:
-                    //led[4] = 1
                     current_state_number.d = 4
                     regfile_ra2 = b0010  // doesnt matter
                     
@@ -377,12 +342,12 @@ module game_control_unit (
                         if (regfile_rd2[0]){   // add button press for testing
                             //game_state.d = Game
                             //current_state_number.d = 7
-                            if (io_button_edge.out[4]){
-                                game_state.d = GameStates.RESET_P1_CORRECT
-                            }
+                            //if (io_button_edge.out[4]){
+                            game_state.d = GameStates.RESET_P1_CORRECT
+                            //}
                         }
                         else{
-                            game_state.d = GameStates.STORE_RNG_COLOUR     
+                            game_state.d = GameStates.WAIT_FOR_PLAYER_INPUT//STORE_RNG_COLOUR     
                     }
                 
                 GameStates.BRANCH_P2_ANS:
@@ -391,17 +356,16 @@ module game_control_unit (
                         regfile_ra2 = 4h6 // get data from p2_correct dff, which is register 6
                         is_player_2_correct.d = regfile_rd2[0]  // for displaying on alchitry top, debugging
                         if (regfile_rd2[0]){  // if player 2 is correct
-                            if (io_button_edge.out[4]){
-                                game_state.d = GameStates.RESET_P2_CORRECT
-                            }
+                            //if (io_button_edge.out[4]){
+                        game_state.d = GameStates.RESET_P2_CORRECT
+                            //}
                         }
                         else{
-                            game_state.d = GameStates.STORE_RNG_COLOUR
+                            game_state.d = GameStates.WAIT_FOR_PLAYER_INPUT//STORE_RNG_COLOUR 
                         }
                 
                 GameStates.RESET_P1_CORRECT:  // reset content of register p1 to 0 for next round
                         current_state_number.d = 7 
-                        //regfile_we = 1    // we are writing
                         regfile_wa = 4h5  // write to p1_correct dff, which is register 5
                         regfile_ra1 = 0   // doesnt matter as we are not using
                         regfile_ra2 = 0   // doesnt matter as we are not using                   
@@ -409,10 +373,10 @@ module game_control_unit (
                         bsel = b00      // doesnt matter as we are not using                      
                         alufn = 6h1A  // "A" operation, let "A" pass through
                         wd_sel = b0   // writing alu output into regfile
-                        if (io_button_edge.out[4]){
-                            regfile_we = 1
-                            game_state.d = GameStates.DEBUG_P1_CORRECT_RESET // since p1 is correct, p2 minus 1 life
-                        }
+                        //if (io_button_edge.out[4]){
+                        regfile_we = 1 // we are writing
+                        game_state.d = GameStates.P1_CORRECT_MINUS_P2_LIVES // since p1 is correct, p2 minus 1 life
+                        //}
                 GameStates.RESET_P2_CORRECT:  // reset content of register p2 to 0 for next round
                         current_state_number.d = 7
                         regfile_wa = 4h6 // write to p2_correct dff, which is register 6
@@ -422,33 +386,14 @@ module game_control_unit (
                         bsel = b00   // doesnt matter as we are not using
                         alufn = 6h1A  // "A" operation, let "A" pass through
                         wd_sel = b0  // writing alu output into regfile
-                        if (io_button_edge.out[4]){
-                            regfile_we = 1
-                            game_state.d = GameStates.DEBUG_P2_CORRECT_RESET // since p1 is correct, p2 minus 1 life
-                        }
+                        //if (io_button_edge.out[4]){
+                        regfile_we = 1
+                        game_state.d = GameStates.P2_CORRECT_MINUS_P1_LIVES // since p1 is correct, p2 minus 1 life
+                        //}
                 
-                GameStates.DEBUG_P1_CORRECT_RESET:
-                        current_state_number.d = 8
-                        regfile_we = 0  // we are NOT writing
-                        regfile_ra2 = 4h5  // check if p1_correct register is set to 0, which is register 5
-                        is_player_1_correct.d = regfile_rd2[0]
-                        if (io_button_edge.out[4]){
-                            game_state.d = GameStates.P1_CORRECT_MINUS_P2_LIVES
-                        }
-                
-                
-                GameStates.DEBUG_P2_CORRECT_RESET:
-                        current_state_number.d = 8
-                        regfile_we = 0
-                        regfile_ra2 = 4h6  // check if p2_correct register is set to 0, which is register 6
-                        is_player_2_correct.d = regfile_rd2[0]
-                        if (io_button_edge.out[4]){
-                            game_state.d = GameStates.P2_CORRECT_MINUS_P1_LIVES
-                        }
                 
                 GameStates.P1_CORRECT_MINUS_P2_LIVES:
                         current_state_number.d = 9  
-                        //regfile_we = 1    // we are writing
                         regfile_wa = 4h1  // write to p2_lives dff, which is register 1
                         regfile_ra1 = 4h1   // get p2's lives from p2_lives dff, which is register 1  
                         regfile_ra2 = 0   // doesnt matter as we are not using                  
@@ -456,10 +401,10 @@ module game_control_unit (
                         bsel = b01      // using 1, which is tagged to selector input b01                       
                         alufn = 6h01  // SUBTRACT operation
                         wd_sel = b0   // writing alu output into regfile
-                        if (io_button_edge.out[4]){
-                            regfile_we = 1
-                            game_state.d = GameStates.UPDATE_P2_LIVES   // since p2 lost a life, go check if he is alive
-                    }
+                        //if (io_button_edge.out[4]){
+                        regfile_we = 1  // we are writing 
+                        game_state.d = GameStates.UPDATE_P2_LIVES   // since p2 lost a life, go check if he is alive
+                    //}
                 
                 GameStates.P2_CORRECT_MINUS_P1_LIVES:
                         current_state_number.d = 9
@@ -470,10 +415,10 @@ module game_control_unit (
                         bsel = b01 // using 1, which is tagged to selector input b01
                         alufn = 6h01  // SUBTRACT operation
                         wd_sel = b0  // writing alu output into regfile
-                        if (io_button_edge.out[4]){
-                            regfile_we = 1
-                            game_state.d = GameStates.UPDATE_P1_LIVES   // since p1 lost a life, go check if he is alive
-                    }
+                        //if (io_button_edge.out[4]){
+                        regfile_we = 1  // we are writing
+                        game_state.d = GameStates.UPDATE_P1_LIVES   // since p1 lost a life, go check if he is alive
+                    //}
                 
                 
                 GameStates.UPDATE_P2_LIVES:
@@ -481,17 +426,17 @@ module game_control_unit (
                         regfile_we = 0 // we are NOT writing
                         regfile_ra2 = 4h1  // reading p2_lives dff, which is register 1, to update p2_current_lives
                         p2_current_lives.d = regfile_rd2[2:0]
-                        if (io_button_edge.out[4]){
-                            game_state.d = GameStates.CHECK_P2_ALIVE
-                        }
+                        //if (io_button_edge.out[4]){
+                        game_state.d = GameStates.CHECK_P2_ALIVE
+                        //}
                 GameStates.UPDATE_P1_LIVES:
                         current_state_number.d = 10
                         regfile_we = 0 // we are NOT writing
                         regfile_ra2 = 4h0  // reading p1_lives dff, which is register 0, to update p1_current_lives
                         p1_current_lives.d = regfile_rd2[2:0]
-                        if (io_button_edge.out[4]){
-                            game_state.d = GameStates.CHECK_P1_ALIVE
-                        }
+                        //if (io_button_edge.out[4]){
+                        game_state.d = GameStates.CHECK_P1_ALIVE
+                        //}
                 
                 
                 GameStates.CHECK_P2_ALIVE: // since p2 lost a life, go check if he is alive
@@ -503,57 +448,77 @@ module game_control_unit (
                         bsel = b01   // using 1, which is tagged to selector input b01
                         alufn = 6h35 // CMPLT operation, check if lives < 1
                         wd_sel = b0  // writing alu output into regfile
-                        if (io_button_edge.out[4]){
-                            regfile_we = 1
-                            game_state.d = GameStates.BRANCH_P2_ALIVE   // branch according to his lives
-                    }      
+                        //if (io_button_edge.out[4]){
+                        regfile_we = 1  // we are writing
+                        game_state.d = GameStates.BRANCH_P2_ALIVE   // branch according to his lives
+                    //}      
                 GameStates.CHECK_P1_ALIVE: // since p1 lost a life, go check if he is alive
                         current_state_number.d = 11
                         regfile_wa = 4h7 // write to p1_alive register, which is register 7
                         regfile_ra1 = 4h0 // read p1's lives from p1_lives register, which is register 0
                         regfile_ra2 = 0 // doesnt matter as we are not using another register's data
-                        asel = b00  // using rd1
-                        bsel = b01  // using 1, which is tagged to selector input b01
+                        asel = b01  // using rd1
+                        bsel = b00  // using 1, which is tagged to selector input b01
                         alufn = 6h35 // CMPLT operation, check if lives < 1
                         wd_sel = b0  // writing alu output into regfile
-                        if (io_button_edge.out[4]){
-                            regfile_we = 1
-                            game_state.d = GameStates.BRANCH_P1_ALIVE   // branch according to his lives
-                    }      
+                        //if (io_button_edge.out[4]){
+                        regfile_we = 1  // we are writing
+                        game_state.d = GameStates.BRANCH_P1_ALIVE   // branch according to his lives
+                    //}      
                 
                 GameStates.BRANCH_P2_ALIVE:
                         current_state_number.d = 12
                         regfile_we = 0  // we are NOT writing
                         regfile_ra2 = 4h8  // get data from p2_alive dff, which is register 8, to read
                         if (regfile_rd2[0]){
-                            if (io_button_edge.out[4]){ 
+                            //if (io_button_edge.out[4]){ 
                             game_state.d = GameStates.GAME_OVER
-                            }
+                            //}
                         }
                         else{
-                            game_state.d = GameStates.STORE_RNG_COLOUR
-                    }
+                            game_state.d = GameStates.RESET_COLOUR
+                        }
                 
                 GameStates.BRANCH_P1_ALIVE:
                         current_state_number.d = 12
                         regfile_we = 0  // we are NOT writing
                         regfile_ra2 = 4h7  // get data from p1_alive dff, which is register 7, to read
                         if (regfile_rd2[0]){
-                            if (io_button_edge.out[4]){ 
+                            //if (io_button_edge.out[4]){ 
                             game_state.d = GameStates.GAME_OVER
-                            }
+                            //}
                         }
                         else{
-                            game_state.d = GameStates.STORE_RNG_COLOUR
-                    }                
+                            game_state.d = GameStates.RESET_COLOUR
+                        }                
                 
-                
+                GameStates.RESET_COLOUR:   //no light as round ended, go generate new colour for next round
+                    
+                        regfile_we = 1 // we are writing new value of 3 into current_colour dff
+                        regfile_wa = 4h2  // writing to current_colour dff, which is register 2
+                        regfile_ra1 = 0  // doesnt matter 
+                        regfile_ra2 = 0  // doesnt matter
+                        asel = b01  // value 0, tagged to selector input b01
+                        bsel = b10  // value 3, tagged to selector input b10
+                        alufn = 6h00 // ADD operation
+                        wd_sel = b0  // using alu output
+                        //if (io_button_edge.out[4]){
+                        game_state.d  = GameStates.STORE_RNG_COLOUR 
+                        //}
                 
                 
                 GameStates.GAME_OVER:
                         current_state_number.d = 13
-                        arcade_buttons.d = 1
-                        current_colour.d = 3 // ws2812b strip is off to indicate game over
+                       // ws2812b strip is off to indicate game over, built in RESET_COLOUR State
+                        regfile_we = 1
+                        regfile_wa = 4h2  // writing to current_colour dff, which is register 2
+                        regfile_ra1 = 0  // doesnt matter 
+                        regfile_ra2 = 0  // doesnt matter
+                        asel = b01   // value 0, tagged to selector input b01
+                        bsel = b10   // value 3, tagged to selector input b10
+                        alufn = 6h00 // ADD operation
+                        wd_sel = b0  // using alu output 
+                
                         
 
                                               
@@ -561,7 +526,8 @@ module game_control_unit (
                 
                 
             }
-            io_led[0][0] = player_1_red_or_start_button
+            // to test whether buttons are working
+            io_led[0][0] = player_1_red_or_start_button  
             io_led[0][1] = player_1_green_button
             io_led[0][2] = player_1_blue_button
             
@@ -581,16 +547,10 @@ module game_control_unit (
             
             current_game_state_number = current_state_number.q  // to keep track of current state
             debug_player_button_input = player_button_input.q  // to keep track of player button input
-            //io_led[2][7:6] = current_colour.q
-            //led = current_colour_choice
-            debug_current_colour_choice = colour_choice
+
+            debug_current_colour_choice = colour_choice   // to keep track of current colour value in register 2
             
             
-            //current_colour.d = b10  // hardsetting to test if LEDs work
-            game_colour_led_value = current_colour.q // to display the current game colour, R G or B
-                                                     // not using ws2812b here, using individual LEDs
-            
-            arcade_buttons_light_up = arcade_buttons.q // to check whether the arcade buttons light up, signifying game has ended
         }
         
     }

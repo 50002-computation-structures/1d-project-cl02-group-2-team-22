@@ -36,12 +36,12 @@ module alchitry_top (
         output reg data
     );
     logic rst;
-    localparam _MP_STAGES_1345061168 = 3'h4;
+    localparam _MP_STAGES_1278818295 = 3'h4;
     logic M_reset_cond_in;
     logic M_reset_cond_out;
     
     reset_conditioner #(
-        .STAGES(_MP_STAGES_1345061168)
+        .STAGES(_MP_STAGES_1278818295)
     ) reset_cond (
         .clk(clk),
         .in(M_reset_cond_in),
@@ -50,7 +50,6 @@ module alchitry_top (
     
     
     logic [1:0] M_game_datapath_debuggerino;
-    logic [1:0] M_game_datapath_intermediate_debug;
     logic M_game_datapath_ws2812b_data;
     logic [7:0] M_game_datapath_current_state;
     logic [2:0] M_game_datapath_player_button_input;
@@ -71,7 +70,6 @@ module alchitry_top (
         .clk(clk),
         .rst(rst),
         .debuggerino(M_game_datapath_debuggerino),
-        .intermediate_debug(M_game_datapath_intermediate_debug),
         .ws2812b_data(M_game_datapath_ws2812b_data),
         .current_state(M_game_datapath_current_state),
         .player_button_input(M_game_datapath_player_button_input),
@@ -105,8 +103,6 @@ module alchitry_top (
         io_led[1'h1][1'h0] = player_2_red_button;
         io_led[1'h1][1'h1] = player_2_green_button;
         io_led[1'h1][2'h2] = player_2_blue_button;
-        io_led[1'h1][2'h3] = M_game_datapath_is_player_2_correct;
-        io_led[1'h1][3'h7:3'h5] = M_game_datapath_current_p1_lives;
         data = M_game_datapath_ws2812b_data;
         io_led[2'h2] = M_game_datapath_current_state;
         

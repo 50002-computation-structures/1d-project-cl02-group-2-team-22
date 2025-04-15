@@ -11,25 +11,25 @@ module datapath (
     
     input io_button[5],
     output debuggerino[2],
-    output intermediate_debug[2],
+    
     output ws2812b_data,   // data for static mode
     output current_state[8],  // to keep track of current game state
     output player_button_input[3],  // to keep track of button input
     
-    output is_player_2_correct,
-    output current_p1_lives[3],
+    output is_player_2_correct,  // for debugging register 6
+    output current_p1_lives[3],  
     
-    output is_player_1_correct,
+    output is_player_1_correct, // for debugging register 5
     output current_p2_lives[3],
     
-    output arcade_buttons_light_up
+    output arcade_buttons_light_up  
      
     
 ) {
  
     sig input_alu_a[32]
     sig input_alu_b[32]
-    sig intermediate_debuggerino[2]   // signal to connect input to output
+
         
     
     // Different modules needed to create game datapath
@@ -62,13 +62,14 @@ module datapath (
     
         alu_unit game_alu
     
+    
+    
     always {
         // driving outputs
         current_state = 0
         
-        // bootstrapping regfile rd2 directly to game control unit
+        // bootstrapping regfile rd2 directly to game control unit for easier reading of values
         gameStates.regfile_rd2 = regfile.rd2
-        //regfile.write_data = 0
         debuggerino = 0
         
         // asel mux
@@ -76,11 +77,11 @@ module datapath (
             b00:
                 input_alu_a = regfile.rd1   // Reg[Ra]
             b01:
-                input_alu_a = d0  // red 
+                input_alu_a = d0  // value for colour red 
             b10:
-                input_alu_a = d1  // green
+                input_alu_a = d1  // value for colour green
             b11:
-                input_alu_a = d2  // blue
+                input_alu_a = d2  // value for colour blue
             default:
                 input_alu_a = regfile.rd1   
         }
@@ -95,7 +96,7 @@ module datapath (
             b10:
                 input_alu_b = d3  // for resetting other values like current colour 
             b11:
-                input_alu_b = d5  // for resetting lives
+                input_alu_b = d5  // for resetting lives if needed
             default:
                 input_alu_b = regfile.rd2
             
@@ -107,7 +108,7 @@ module datapath (
         game_alu.alufn = gameStates.alufn // from gameStates output
         
         
-        //gameStates.regfile_rd2 = input_alu_b
+        
         
         
         // wdsel mux
@@ -130,23 +131,25 @@ module datapath (
                 
         }
         
-        debuggerino = regfile.current_colour_out[1:0]
-        //intermediate_debuggerino = regfile.current_colour_out[1:0]
-        intermediate_debuggerino = gameStates.debug_current_colour_choice   // from game_control_unit
-        intermediate_debug = intermediate_debuggerino   
+        debuggerino = regfile.current_colour_out[1:0]  // used to debug colour choice
+        
+        
+         
            
+        // data needed to display colour on ws2812b strip
         gameStates.current_colour_choice = regfile.current_colour_out[1:0]
         ws2812b_data = gameStates.data
         
-        current_state = gameStates.current_game_state_number
-        player_button_input = gameStates.debug_player_button_input
+        
+        current_state = gameStates.current_game_state_number  // for keeping track of current state when debugging
+        player_button_input = gameStates.debug_player_button_input  // for debugging player's button input
         
         
         current_p2_lives = gameStates.p2_current_lives_out
-        is_player_1_correct = gameStates.is_p1_correct_out
+        is_player_1_correct = gameStates.is_p1_correct_out  // for debugging register 5
         
         current_p1_lives = gameStates.p1_current_lives_out
-        is_player_2_correct = gameStates.is_p2_correct_out
+        is_player_2_correct = gameStates.is_p2_correct_out  // for debugging register 6
         
         arcade_buttons_light_up = gameStates.arcade_buttons_light_up  // to light up arcade buttons when game is over
         
