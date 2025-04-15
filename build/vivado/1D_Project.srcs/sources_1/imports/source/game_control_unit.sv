@@ -67,10 +67,10 @@ module game_control_unit (
     localparam ROW_DIMENSION = 5'h1;
     localparam PIXEL_COUNT = 10'h1e;
     logic [1:0] colour_choice;
-    localparam _MP_COLUMN_DIMENSION_1011252489 = 5'h1e;
-    localparam _MP_ROW_DIMENSION_1011252489 = 5'h1;
-    localparam _MP_PIXEL_COUNT_1011252489 = 10'h1e;
-    localparam _MP_BUFFER_SIZE_1011252489 = 11'h400;
+    localparam _MP_COLUMN_DIMENSION_276135379 = 5'h1e;
+    localparam _MP_ROW_DIMENSION_276135379 = 5'h1;
+    localparam _MP_PIXEL_COUNT_276135379 = 10'h1e;
+    localparam _MP_BUFFER_SIZE_276135379 = 11'h400;
     logic [7:0] M_colour_display_led;
     logic [2:0][7:0] M_colour_display_io_led;
     logic [7:0] M_colour_display_io_segment;
@@ -80,10 +80,10 @@ module game_control_unit (
     logic [2:0] M_colour_display_debug_colour_choice_mux;
     
     static_mode #(
-        .COLUMN_DIMENSION(_MP_COLUMN_DIMENSION_1011252489),
-        .ROW_DIMENSION(_MP_ROW_DIMENSION_1011252489),
-        .PIXEL_COUNT(_MP_PIXEL_COUNT_1011252489),
-        .BUFFER_SIZE(_MP_BUFFER_SIZE_1011252489)
+        .COLUMN_DIMENSION(_MP_COLUMN_DIMENSION_276135379),
+        .ROW_DIMENSION(_MP_ROW_DIMENSION_276135379),
+        .PIXEL_COUNT(_MP_PIXEL_COUNT_276135379),
+        .BUFFER_SIZE(_MP_BUFFER_SIZE_276135379)
     ) colour_display (
         .clk(clk),
         .rst(rst),
@@ -106,14 +106,14 @@ module game_control_unit (
     logic [2:0] D_p1_current_lives_d, D_p1_current_lives_q = 0;
     logic [2:0] D_p2_current_lives_d, D_p2_current_lives_q = 0;
     logic [4:0] D_game_state_d, D_game_state_q = 5'h0;
-    localparam _MP_RISE_2131349013 = 1'h1;
-    localparam _MP_FALL_2131349013 = 1'h0;
+    localparam _MP_RISE_2031419592 = 1'h1;
+    localparam _MP_FALL_2031419592 = 1'h0;
     logic M_player_1_red_or_start_button_edge_in;
     logic M_player_1_red_or_start_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_2131349013),
-        .FALL(_MP_FALL_2131349013)
+        .RISE(_MP_RISE_2031419592),
+        .FALL(_MP_FALL_2031419592)
     ) player_1_red_or_start_button_edge (
         .clk(clk),
         .in(M_player_1_red_or_start_button_edge_in),
@@ -121,14 +121,14 @@ module game_control_unit (
     );
     
     
-    localparam _MP_RISE_1237639850 = 1'h1;
-    localparam _MP_FALL_1237639850 = 1'h0;
+    localparam _MP_RISE_405445017 = 1'h1;
+    localparam _MP_FALL_405445017 = 1'h0;
     logic M_player_1_green_button_edge_in;
     logic M_player_1_green_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_1237639850),
-        .FALL(_MP_FALL_1237639850)
+        .RISE(_MP_RISE_405445017),
+        .FALL(_MP_FALL_405445017)
     ) player_1_green_button_edge (
         .clk(clk),
         .in(M_player_1_green_button_edge_in),
@@ -136,14 +136,14 @@ module game_control_unit (
     );
     
     
-    localparam _MP_RISE_1839715389 = 1'h1;
-    localparam _MP_FALL_1839715389 = 1'h0;
+    localparam _MP_RISE_546339589 = 1'h1;
+    localparam _MP_FALL_546339589 = 1'h0;
     logic M_player_1_blue_button_edge_in;
     logic M_player_1_blue_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_1839715389),
-        .FALL(_MP_FALL_1839715389)
+        .RISE(_MP_RISE_546339589),
+        .FALL(_MP_FALL_546339589)
     ) player_1_blue_button_edge (
         .clk(clk),
         .in(M_player_1_blue_button_edge_in),
@@ -151,14 +151,14 @@ module game_control_unit (
     );
     
     
-    localparam _MP_RISE_1538712453 = 1'h1;
-    localparam _MP_FALL_1538712453 = 1'h0;
+    localparam _MP_RISE_807121418 = 1'h1;
+    localparam _MP_FALL_807121418 = 1'h0;
     logic M_player_2_red_button_edge_in;
     logic M_player_2_red_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_1538712453),
-        .FALL(_MP_FALL_1538712453)
+        .RISE(_MP_RISE_807121418),
+        .FALL(_MP_FALL_807121418)
     ) player_2_red_button_edge (
         .clk(clk),
         .in(M_player_2_red_button_edge_in),
@@ -166,14 +166,14 @@ module game_control_unit (
     );
     
     
-    localparam _MP_RISE_410890445 = 1'h1;
-    localparam _MP_FALL_410890445 = 1'h0;
+    localparam _MP_RISE_491692667 = 1'h1;
+    localparam _MP_FALL_491692667 = 1'h0;
     logic M_player_2_green_button_edge_in;
     logic M_player_2_green_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_410890445),
-        .FALL(_MP_FALL_410890445)
+        .RISE(_MP_RISE_491692667),
+        .FALL(_MP_FALL_491692667)
     ) player_2_green_button_edge (
         .clk(clk),
         .in(M_player_2_green_button_edge_in),
@@ -181,14 +181,14 @@ module game_control_unit (
     );
     
     
-    localparam _MP_RISE_877827268 = 1'h1;
-    localparam _MP_FALL_877827268 = 1'h0;
+    localparam _MP_RISE_1168289510 = 1'h1;
+    localparam _MP_FALL_1168289510 = 1'h0;
     logic M_player_2_blue_button_edge_in;
     logic M_player_2_blue_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_877827268),
-        .FALL(_MP_FALL_877827268)
+        .RISE(_MP_RISE_1168289510),
+        .FALL(_MP_FALL_1168289510)
     ) player_2_blue_button_edge (
         .clk(clk),
         .in(M_player_2_blue_button_edge_in),
@@ -196,37 +196,37 @@ module game_control_unit (
     );
     
     
-    localparam logic [4:0][0:0] _MP_RISE_1255267780 = {{1'h1, 1'h1, 1'h1, 1'h1, 1'h1}};
-    localparam logic [4:0][0:0] _MP_FALL_1255267780 = {{1'h0, 1'h0, 1'h0, 1'h0, 1'h0}};
+    localparam logic [4:0][0:0] _MP_RISE_50138050 = {{1'h1, 1'h1, 1'h1, 1'h1, 1'h1}};
+    localparam logic [4:0][0:0] _MP_FALL_50138050 = {{1'h0, 1'h0, 1'h0, 1'h0, 1'h0}};
     logic [4:0] M_io_button_edge_in;
     logic [4:0] M_io_button_edge_out;
     
-    genvar idx_0_1255267780;
+    genvar idx_0_50138050;
     
     generate
-        for (idx_0_1255267780 = 0; idx_0_1255267780 < 5; idx_0_1255267780 = idx_0_1255267780 + 1) begin: forLoop_idx_0_1255267780
+        for (idx_0_50138050 = 0; idx_0_50138050 < 5; idx_0_50138050 = idx_0_50138050 + 1) begin: forLoop_idx_0_50138050
             edge_detector #(
-                .RISE(_MP_RISE_1255267780[idx_0_1255267780]),
-                .FALL(_MP_FALL_1255267780[idx_0_1255267780])
+                .RISE(_MP_RISE_50138050[idx_0_50138050]),
+                .FALL(_MP_FALL_50138050[idx_0_50138050])
             ) io_button_edge (
                 .clk(clk),
-                .in(M_io_button_edge_in[idx_0_1255267780]),
-                .out(M_io_button_edge_out[idx_0_1255267780])
+                .in(M_io_button_edge_in[idx_0_50138050]),
+                .out(M_io_button_edge_out[idx_0_50138050])
             );
         end
     endgenerate
     
     
-    localparam _MP_CLK_FREQ_1018835238 = 24'h989680;
-    localparam _MP_MIN_DELAY_1018835238 = 5'h14;
-    localparam _MP_NUM_SYNC_1018835238 = 2'h2;
+    localparam _MP_CLK_FREQ_756295700 = 24'h989680;
+    localparam _MP_MIN_DELAY_756295700 = 5'h14;
+    localparam _MP_NUM_SYNC_756295700 = 2'h2;
     logic M_p1_red_or_start_btn_cond_in;
     logic M_p1_red_or_start_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_1018835238),
-        .MIN_DELAY(_MP_MIN_DELAY_1018835238),
-        .NUM_SYNC(_MP_NUM_SYNC_1018835238)
+        .CLK_FREQ(_MP_CLK_FREQ_756295700),
+        .MIN_DELAY(_MP_MIN_DELAY_756295700),
+        .NUM_SYNC(_MP_NUM_SYNC_756295700)
     ) p1_red_or_start_btn_cond (
         .clk(clk),
         .in(M_p1_red_or_start_btn_cond_in),
@@ -234,16 +234,16 @@ module game_control_unit (
     );
     
     
-    localparam _MP_CLK_FREQ_1538887638 = 24'h989680;
-    localparam _MP_MIN_DELAY_1538887638 = 5'h14;
-    localparam _MP_NUM_SYNC_1538887638 = 2'h2;
+    localparam _MP_CLK_FREQ_1168260087 = 24'h989680;
+    localparam _MP_MIN_DELAY_1168260087 = 5'h14;
+    localparam _MP_NUM_SYNC_1168260087 = 2'h2;
     logic M_p1_green_btn_cond_in;
     logic M_p1_green_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_1538887638),
-        .MIN_DELAY(_MP_MIN_DELAY_1538887638),
-        .NUM_SYNC(_MP_NUM_SYNC_1538887638)
+        .CLK_FREQ(_MP_CLK_FREQ_1168260087),
+        .MIN_DELAY(_MP_MIN_DELAY_1168260087),
+        .NUM_SYNC(_MP_NUM_SYNC_1168260087)
     ) p1_green_btn_cond (
         .clk(clk),
         .in(M_p1_green_btn_cond_in),
@@ -251,16 +251,16 @@ module game_control_unit (
     );
     
     
-    localparam _MP_CLK_FREQ_2075630680 = 24'h989680;
-    localparam _MP_MIN_DELAY_2075630680 = 5'h14;
-    localparam _MP_NUM_SYNC_2075630680 = 2'h2;
+    localparam _MP_CLK_FREQ_101974777 = 24'h989680;
+    localparam _MP_MIN_DELAY_101974777 = 5'h14;
+    localparam _MP_NUM_SYNC_101974777 = 2'h2;
     logic M_p1_blue_btn_cond_in;
     logic M_p1_blue_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_2075630680),
-        .MIN_DELAY(_MP_MIN_DELAY_2075630680),
-        .NUM_SYNC(_MP_NUM_SYNC_2075630680)
+        .CLK_FREQ(_MP_CLK_FREQ_101974777),
+        .MIN_DELAY(_MP_MIN_DELAY_101974777),
+        .NUM_SYNC(_MP_NUM_SYNC_101974777)
     ) p1_blue_btn_cond (
         .clk(clk),
         .in(M_p1_blue_btn_cond_in),
@@ -268,16 +268,16 @@ module game_control_unit (
     );
     
     
-    localparam _MP_CLK_FREQ_363281433 = 24'h989680;
-    localparam _MP_MIN_DELAY_363281433 = 5'h14;
-    localparam _MP_NUM_SYNC_363281433 = 2'h2;
+    localparam _MP_CLK_FREQ_1527100212 = 24'h989680;
+    localparam _MP_MIN_DELAY_1527100212 = 5'h14;
+    localparam _MP_NUM_SYNC_1527100212 = 2'h2;
     logic M_p2_red_btn_cond_in;
     logic M_p2_red_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_363281433),
-        .MIN_DELAY(_MP_MIN_DELAY_363281433),
-        .NUM_SYNC(_MP_NUM_SYNC_363281433)
+        .CLK_FREQ(_MP_CLK_FREQ_1527100212),
+        .MIN_DELAY(_MP_MIN_DELAY_1527100212),
+        .NUM_SYNC(_MP_NUM_SYNC_1527100212)
     ) p2_red_btn_cond (
         .clk(clk),
         .in(M_p2_red_btn_cond_in),
@@ -285,16 +285,16 @@ module game_control_unit (
     );
     
     
-    localparam _MP_CLK_FREQ_1738931681 = 24'h989680;
-    localparam _MP_MIN_DELAY_1738931681 = 5'h14;
-    localparam _MP_NUM_SYNC_1738931681 = 2'h2;
+    localparam _MP_CLK_FREQ_1283475219 = 24'h989680;
+    localparam _MP_MIN_DELAY_1283475219 = 5'h14;
+    localparam _MP_NUM_SYNC_1283475219 = 2'h2;
     logic M_p2_green_btn_cond_in;
     logic M_p2_green_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_1738931681),
-        .MIN_DELAY(_MP_MIN_DELAY_1738931681),
-        .NUM_SYNC(_MP_NUM_SYNC_1738931681)
+        .CLK_FREQ(_MP_CLK_FREQ_1283475219),
+        .MIN_DELAY(_MP_MIN_DELAY_1283475219),
+        .NUM_SYNC(_MP_NUM_SYNC_1283475219)
     ) p2_green_btn_cond (
         .clk(clk),
         .in(M_p2_green_btn_cond_in),
@@ -302,16 +302,16 @@ module game_control_unit (
     );
     
     
-    localparam _MP_CLK_FREQ_1895111164 = 24'h989680;
-    localparam _MP_MIN_DELAY_1895111164 = 5'h14;
-    localparam _MP_NUM_SYNC_1895111164 = 2'h2;
+    localparam _MP_CLK_FREQ_413774071 = 24'h989680;
+    localparam _MP_MIN_DELAY_413774071 = 5'h14;
+    localparam _MP_NUM_SYNC_413774071 = 2'h2;
     logic M_p2_blue_btn_cond_in;
     logic M_p2_blue_btn_cond_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_1895111164),
-        .MIN_DELAY(_MP_MIN_DELAY_1895111164),
-        .NUM_SYNC(_MP_NUM_SYNC_1895111164)
+        .CLK_FREQ(_MP_CLK_FREQ_413774071),
+        .MIN_DELAY(_MP_MIN_DELAY_413774071),
+        .NUM_SYNC(_MP_NUM_SYNC_413774071)
     ) p2_blue_btn_cond (
         .clk(clk),
         .in(M_p2_blue_btn_cond_in),
@@ -319,24 +319,24 @@ module game_control_unit (
     );
     
     
-    localparam logic [4:0][23:0] _MP_CLK_FREQ_1393432466 = {{24'h989680, 24'h989680, 24'h989680, 24'h989680, 24'h989680}};
-    localparam _MP_MIN_DELAY_1393432466 = 5'h14;
-    localparam _MP_NUM_SYNC_1393432466 = 2'h2;
+    localparam logic [4:0][23:0] _MP_CLK_FREQ_110136567 = {{24'h989680, 24'h989680, 24'h989680, 24'h989680, 24'h989680}};
+    localparam _MP_MIN_DELAY_110136567 = 5'h14;
+    localparam _MP_NUM_SYNC_110136567 = 2'h2;
     logic [4:0] M_io_button_cond_in;
     logic [4:0] M_io_button_cond_out;
     
-    genvar idx_0_1393432466;
+    genvar idx_0_110136567;
     
     generate
-        for (idx_0_1393432466 = 0; idx_0_1393432466 < 5; idx_0_1393432466 = idx_0_1393432466 + 1) begin: forLoop_idx_0_1393432466
+        for (idx_0_110136567 = 0; idx_0_110136567 < 5; idx_0_110136567 = idx_0_110136567 + 1) begin: forLoop_idx_0_110136567
             button_conditioner #(
-                .CLK_FREQ(_MP_CLK_FREQ_1393432466[idx_0_1393432466]),
-                .MIN_DELAY(_MP_MIN_DELAY_1393432466),
-                .NUM_SYNC(_MP_NUM_SYNC_1393432466)
+                .CLK_FREQ(_MP_CLK_FREQ_110136567[idx_0_110136567]),
+                .MIN_DELAY(_MP_MIN_DELAY_110136567),
+                .NUM_SYNC(_MP_NUM_SYNC_110136567)
             ) io_button_cond (
                 .clk(clk),
-                .in(M_io_button_cond_in[idx_0_1393432466]),
-                .out(M_io_button_cond_out[idx_0_1393432466])
+                .in(M_io_button_cond_in[idx_0_110136567]),
+                .out(M_io_button_cond_out[idx_0_110136567])
             );
         end
     endgenerate
@@ -637,8 +637,8 @@ module game_control_unit (
                     regfile_wa = 4'h7;
                     regfile_ra1 = 4'h0;
                     regfile_ra2 = 1'h0;
-                    asel = 2'h1;
-                    bsel = 2'h0;
+                    asel = 2'h0;
+                    bsel = 2'h1;
                     alufn = 6'h35;
                     wd_sel = 1'h0;
                     regfile_we = 1'h1;

@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2023.2 (win64) Build 4029153 Fri Oct 13 20:14:34 MDT 2023
-| Date         : Wed Apr 16 00:31:31 2025
+| Date         : Wed Apr 16 01:02:43 2025
 | Host         : LAPTOP-G2H00B5B running 64-bit major release  (build 9200)
 | Command      : report_methodology -file alchitry_top_methodology_drc_routed.rpt -pb alchitry_top_methodology_drc_routed.pb -rpx alchitry_top_methodology_drc_routed.rpx
 | Design       : alchitry_top
@@ -23,12 +23,11 @@ Table of Contents
           Floorplan: design_1
       Design limits: <entire design considered>
              Max violations: <unlimited>
-             Violations found: 34
+             Violations found: 33
 +-----------+----------+-------------------------------+------------+
 | Rule      | Severity | Description                   | Violations |
 +-----------+----------+-------------------------------+------------+
 | LUTAR-1   | Warning  | LUT drives async reset alert  | 1          |
-| SYNTH-10  | Warning  | Wide multiplier               | 1          |
 | TIMING-18 | Warning  | Missing input or output delay | 32         |
 +-----------+----------+-------------------------------+------------+
 
@@ -38,11 +37,6 @@ LUTAR-1#1 Warning
 LUT drives async reset alert  
 LUT cell reset_cond/D_stage_q[3]_i_1, with 2 or more inputs, drives asynchronous preset/clear pin(s) reset_cond/D_stage_q_reg[0]/PRE, reset_cond/D_stage_q_reg[1]/PRE,
 reset_cond/D_stage_q_reg[2]/PRE, reset_cond/D_stage_q_reg[3]/PRE. The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
-Related violations: <none>
-
-SYNTH-10#1 Warning
-Wide multiplier  
-Detected multiplier at game_datapath/game_alu/out_sig0 of size 18x18, it is decomposed from a wide multipler into 4 DSP blocks.
 Related violations: <none>
 
 TIMING-18#1 Warning

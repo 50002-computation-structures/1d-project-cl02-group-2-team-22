@@ -26,14 +26,14 @@ module datapath (
     );
     logic [31:0] input_alu_a;
     logic [31:0] input_alu_b;
-    localparam _MP_SEED_511468521 = 30'h286b4b9c;
-    localparam _MP_FAST_CLOCK_DIV_511468521 = 4'hc;
+    localparam _MP_SEED_353239104 = 30'h286b4b9c;
+    localparam _MP_FAST_CLOCK_DIV_353239104 = 4'hc;
     logic M_rngesus_out;
     logic [15:0] M_rngesus_debug;
     
     variable_timer #(
-        .SEED(_MP_SEED_511468521),
-        .FAST_CLOCK_DIV(_MP_FAST_CLOCK_DIV_511468521)
+        .SEED(_MP_SEED_353239104),
+        .FAST_CLOCK_DIV(_MP_FAST_CLOCK_DIV_353239104)
     ) rngesus (
         .clk(clk),
         .rst(rst),

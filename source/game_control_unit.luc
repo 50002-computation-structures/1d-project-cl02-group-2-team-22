@@ -457,8 +457,8 @@ module game_control_unit (
                         regfile_wa = 4h7 // write to p1_alive register, which is register 7
                         regfile_ra1 = 4h0 // read p1's lives from p1_lives register, which is register 0
                         regfile_ra2 = 0 // doesnt matter as we are not using another register's data
-                        asel = b01  // using rd1
-                        bsel = b00  // using 1, which is tagged to selector input b01
+                        asel = b00  // using rd1
+                        bsel = b01  // using 1, which is tagged to selector input b01
                         alufn = 6h35 // CMPLT operation, check if lives < 1
                         wd_sel = b0  // writing alu output into regfile
                         //if (io_button_edge.out[4]){

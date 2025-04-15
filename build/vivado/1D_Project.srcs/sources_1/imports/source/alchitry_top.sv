@@ -36,12 +36,12 @@ module alchitry_top (
         output reg data
     );
     logic rst;
-    localparam _MP_STAGES_1278818295 = 3'h4;
+    localparam _MP_STAGES_834408446 = 3'h4;
     logic M_reset_cond_in;
     logic M_reset_cond_out;
     
     reset_conditioner #(
-        .STAGES(_MP_STAGES_1278818295)
+        .STAGES(_MP_STAGES_834408446)
     ) reset_cond (
         .clk(clk),
         .in(M_reset_cond_in),

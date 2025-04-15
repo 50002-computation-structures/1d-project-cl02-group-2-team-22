@@ -27,15 +27,15 @@ module static_mode #(
     logic [2:0] debug_colour_choice_intermediate_mux;
     logic [(BUFFER_SIZE)-1:0] pixel_address;
     localparam CLK_FREQ = 27'h5f5e100;
-    localparam _MP_CLK_FREQ_903041728 = 27'h5f5e100;
-    localparam _MP_MIN_DELAY_903041728 = 5'h14;
-    localparam _MP_NUM_SYNC_903041728 = 2'h2;
+    localparam _MP_CLK_FREQ_1042105867 = 27'h5f5e100;
+    localparam _MP_MIN_DELAY_1042105867 = 5'h14;
+    localparam _MP_NUM_SYNC_1042105867 = 2'h2;
     logic M_clear_button_out;
     
     button_conditioner #(
-        .CLK_FREQ(_MP_CLK_FREQ_903041728),
-        .MIN_DELAY(_MP_MIN_DELAY_903041728),
-        .NUM_SYNC(_MP_NUM_SYNC_903041728)
+        .CLK_FREQ(_MP_CLK_FREQ_1042105867),
+        .MIN_DELAY(_MP_MIN_DELAY_1042105867),
+        .NUM_SYNC(_MP_NUM_SYNC_1042105867)
     ) clear_button (
         .in(io_button[1'h1]),
         .clk(clk),
@@ -43,13 +43,13 @@ module static_mode #(
     );
     
     
-    localparam _MP_RISE_982486101 = 1'h1;
-    localparam _MP_FALL_982486101 = 1'h0;
+    localparam _MP_RISE_268373813 = 1'h1;
+    localparam _MP_FALL_268373813 = 1'h0;
     logic M_clear_button_edge_out;
     
     edge_detector #(
-        .RISE(_MP_RISE_982486101),
-        .FALL(_MP_FALL_982486101)
+        .RISE(_MP_RISE_268373813),
+        .FALL(_MP_FALL_268373813)
     ) clear_button_edge (
         .in(M_clear_button_out),
         .clk(clk),
@@ -62,18 +62,18 @@ module static_mode #(
     localparam logic [28:0][1:0] DISPLAY_RED = {{2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1, 2'h1}};
     localparam logic [28:0][1:0] DISPLAY_BLUE = {{2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2, 2'h2}};
     localparam logic [28:0][1:0] DISPLAY_GREEN = {{2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3, 2'h3}};
-    localparam _MP_PIXEL_COUNT_966295090 = PIXEL_COUNT;
+    localparam _MP_PIXEL_COUNT_656212950 = PIXEL_COUNT;
     logic M_driver_update;
     logic [23:0] M_driver_color;
     logic M_driver_clear;
-    logic [($clog2(_MP_PIXEL_COUNT_966295090))-1:0] M_driver_pixel_address;
+    logic [($clog2(_MP_PIXEL_COUNT_656212950))-1:0] M_driver_pixel_address;
     logic M_driver_data;
     logic M_driver_next_pixel;
     logic M_driver_reset;
     logic M_driver_done;
     
     ws2812b_driver #(
-        .PIXEL_COUNT(_MP_PIXEL_COUNT_966295090)
+        .PIXEL_COUNT(_MP_PIXEL_COUNT_656212950)
     ) driver (
         .rst(rst),
         .clk(clk),
